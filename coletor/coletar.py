@@ -217,6 +217,38 @@ def dados_cnpj(cnpj):
     return info
 
 
+def texto_da_licitacao(o):
+    """Observações + descrição dos itens da licitação (onde costuma estar a rua da obra)."""
+    m = re.match(r"pncp-(\d{14})-\d-(\d+)/(\d{4})", o.get("id", ""))
+    if not m:
+        return ""
+    cnpj, seq, ano = m.group(1), int(m.group(2)), m.group(3)
+    partes = [o.get("texto_extra") or ""]
+    comp = http_json(f"{PNCP_API}/orgaos/{cnpj}/compras/{ano}/{seq}", tentativas=1)
+    if isinstance(comp, dict):
+        partes += [comp.get("informacaoComplementar") or "", comp.get("objetoCompra") or ""]
+    itens = http_json(f"{PNCP_API}/orgaos/{cnpj}/compras/{ano}/{seq}/itens?pagina=1&tamanhoPagina=20", tentativas=1)
+    if isinstance(itens, list):
+        partes += [str(i.get("descricao") or "") for i in itens[:20]]
+    time.sleep(0.3)
+    return " ; ".join(p for p in partes if p)
+
+
+def endereco_do_orgao(cnpj):
+    """Endereço público do órgão que fez a licitação (prefeitura, secretaria…)."""
+    d = http_json(BRASILAPI_CNPJ + cnpj, tentativas=2)
+    time.sleep(0.5)
+    if not d:
+        return None
+    rua = " ".join(x for x in [d.get("descricao_tipo_de_logradouro") or "", d.get("logradouro") or ""] if x).strip().title()
+    num = str(d.get("numero") or "").strip()
+    bairro = (d.get("bairro") or "").title()
+    if not rua:
+        return None
+    consulta = rua + (f", {num}" if num and num.upper() not in ("S/N", "SN", "0") else "") + (f" – {bairro}" if bairro else "")
+    return dict(consulta=consulta, texto=consulta, nome=(d.get("nome_fantasia") or d.get("razao_social") or "").title())
+
+
 def converter(item, muni, hoje):
     objeto = re.sub(r"\s+", " ", item.get("objetoCompra") or "").strip()
     objeto = re.sub(r"^\[portal de compras p[uú]blicas\]\s*-\s*", "", objeto, flags=re.I)
@@ -271,12 +303,16 @@ def converter(item, muni, hoje):
         previsao="", dica=dica, fonte=link,
         data_fonte=(item.get("dataPublicacaoPncp") or "")[:10],
         data_iso=(item.get("dataPublicacaoPncp") or "")[:10],
-        encerramento=enc, origem="PNCP (automático)", modalidade=item.get("modalidadeNome") or "",
+        encerramento=enc, origem="PNCP (automático)", orgao_cnpj=org.get("cnpj") or "",
+        texto_extra=re.sub(r"\s+", " ", item.get("informacaoComplementar") or "")[:600], modalidade=item.get("modalidadeNome") or "",
         _compra=item,
     )
 
 
 # ---------------------------------------------------------------- Junção
+CAMPOS_SO_DO_ROBO = ("texto_extra", "geo_ok", "orgao_cnpj", "cnpj_construtora", "encerramento", "modalidade", "ibge")
+
+
 def ler_json(nome, padrao):
     caminho = os.path.join(DADOS, nome)
     if os.path.exists(caminho):
@@ -369,7 +405,7 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
     if localizar_obras:
         from localizar import localizar
         por_nome = {(norm(m["nome"]), m["uf"]): m for m in municipios}
-        precisao = localizar(tudo, por_nome, DADOS)
+        precisao = localizar(tudo, por_nome, DADOS, texto_extra=texto_da_licitacao, endereco_orgao=endereco_do_orgao)
         print(f"Localização: {precisao}")
     gravar_json("obras_coletadas.json", coletadas)
 
@@ -395,7 +431,8 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
         raise SystemExit(2)
     gravar_json("obras.json", dict(
         atualizado_em=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        regioes=regioes, total=len(tudo), relatorio=relatorio, obras=tudo), compacto=True)
+        regioes=regioes, total=len(tudo), relatorio=relatorio,
+        obras=[{k: v for k, v in o.items() if k not in CAMPOS_SO_DO_ROBO and v not in ("", None)} for o in tudo]), compacto=True)
     print(f"OK: {len(coletadas)} obras do PNCP + {len(manuais)} da pesquisa manual = {len(tudo)}")
     return tudo
 

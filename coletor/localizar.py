@@ -142,8 +142,22 @@ out center 30;"""
     return ref
 
 
-def localizar(obras, municipios_por_nome, pasta_dados, limite=400):
-    """Atualiza lat/lon/precisao/bairro/referencia das obras. Devolve contagem por precisão."""
+def _aceitar(r, centro, mun_nome):
+    return (r and centro and _dist(centro["lat"], centro["lon"], r["lat"], r["lon"]) <= MAX_KM_DO_CENTRO
+            and r["precisao"] != "cidade"
+            and not (r["precisao"] == "bairro" and _norm(r["bairro"] or "") in ("", _norm(mun_nome))))
+
+
+def localizar(obras, municipios_por_nome, pasta_dados, limite=500, texto_extra=None, endereco_orgao=None):
+    """Atualiza lat/lon/precisao/bairro/referencia das obras. Devolve contagem por precisão.
+
+    Ordem de tentativa:
+      1. endereço da obra (campo endereco ou rua citada no nome da licitação);
+      2. rua citada nos itens/observações da licitação (texto_extra(o) -> texto);
+      3. endereço do órgão que fez a licitação (endereco_orgao(o) -> dict(texto, consulta, nome)),
+         marcado como precisao "orgao" para o app avisar que não é o local da obra;
+      4. centro da cidade (precisao "cidade").
+    """
     caminho = os.path.join(pasta_dados, "geocache.json")
     cache = {}
     if os.path.exists(caminho):
@@ -152,39 +166,77 @@ def localizar(obras, municipios_por_nome, pasta_dados, limite=400):
     if cache.get("versao") != 2:
         cache = {"versao": 2}
     geo, refs = cache.setdefault("geo", {}), cache.setdefault("ref", {})
+    extras, orgaos = cache.setdefault("extra", {}), cache.setdefault("orgao", {})
     feitas = 0
-    contagem = {"rua": 0, "via": 0, "bairro": 0, "cidade": 0}
+    contagem = {"rua": 0, "via": 0, "bairro": 0, "orgao": 0, "cidade": 0}
+
+    def tentar(end, mun_nome, uf, centro):
+        nonlocal feitas
+        if not (end and centro) or feitas >= limite:
+            return None
+        for q in _consultas(end, mun_nome, uf):
+            novo = q not in geo
+            r = _geocodificar(q, geo)
+            feitas += 1 if novo else 0
+            if _aceitar(r, centro, mun_nome):
+                return r
+        return None
+
     for o in obras:
         if o.get("precisao") in ("rua", "via", "bairro") and o.get("lat") and o.get("geo_ok"):
             contagem[o["precisao"]] += 1
             continue
+        uf = o.get("uf") or "RS"
         mun_nome = (o.get("municipio") or "").split("/")[0].strip()
-        centro = municipios_por_nome.get((_norm(mun_nome), o.get("uf") or "RS"))
+        centro = municipios_por_nome.get((_norm(mun_nome), uf))
         end = o.get("endereco") or ""
         if not end or _norm(end) == _norm(mun_nome):
             end = endereco_do_texto(o.get("nome", ""))
             if end and not o.get("endereco"):
                 o["endereco"] = end
-        resultado = None
-        if end and centro and feitas < limite:
-            for q in _consultas(end, mun_nome, o.get("uf") or "RS"):
-                novo = q not in geo
-                r = _geocodificar(q, geo)
-                feitas += 1 if novo else 0
-                if r and _dist(centro["lat"], centro["lon"], r["lat"], r["lon"]) <= MAX_KM_DO_CENTRO and r["precisao"] != "cidade" \
-                        and not (r["precisao"] == "bairro" and _norm(r["bairro"] or "") in ("", _norm(mun_nome))):
-                    resultado = r
-                    break
+        resultado = tentar(end, mun_nome, uf, centro)
+
+        # 2. itens e observações da licitação
+        if not resultado and texto_extra and o.get("id", "").startswith("pncp-"):
+            if o["id"] not in extras:
+                extras[o["id"]] = endereco_do_texto(texto_extra(o) or "")
+            end2 = extras[o["id"]]
+            if end2:
+                resultado = tentar(end2, mun_nome, uf, centro)
+                if resultado and not o.get("endereco"):
+                    o["endereco"] = end2
+
         if resultado:
             o.update(lat=round(resultado["lat"], 5), lon=round(resultado["lon"], 5), precisao=resultado["precisao"],
                      bairro=resultado["bairro"], geo_ok=True)
+            o.pop("local_orgao", None)
             if resultado["precisao"] in ("rua", "via"):
                 o["referencia"] = _referencia(resultado["lat"], resultado["lon"], refs)
-        else:
-            o["precisao"] = "cidade"
-            if centro:
-                o["lat"], o["lon"] = round(centro["lat"], 4), round(centro["lon"], 4)
-        contagem[o["precisao"]] += 1
+            contagem[o["precisao"]] += 1
+            continue
+
+        # 3. endereço do órgão comprador
+        if endereco_orgao and o.get("id", "").startswith("pncp-"):
+            cnpj = o.get("orgao_cnpj") or (re.match(r"pncp-(\d{14})", o["id"]) or [None, None])[1]
+            if cnpj and cnpj not in orgaos:
+                info = endereco_orgao(cnpj) or {}
+                r = None
+                if info.get("consulta"):
+                    r = tentar(info["consulta"], mun_nome, uf, centro)
+                orgaos[cnpj] = dict(texto=info.get("texto", ""), nome=info.get("nome", ""),
+                                    lat=r["lat"] if r else None, lon=r["lon"] if r else None)
+            og = orgaos.get(cnpj) if cnpj else None
+            if og and og.get("lat") is not None:
+                o.update(lat=round(og["lat"], 5), lon=round(og["lon"], 5), precisao="orgao",
+                         local_orgao=f"{og['nome']} – {og['texto']}".strip(" –"))
+                contagem["orgao"] += 1
+                continue
+
+        # 4. centro da cidade
+        o["precisao"] = "cidade"
+        if centro:
+            o["lat"], o["lon"] = round(centro["lat"], 4), round(centro["lon"], 4)
+        contagem["cidade"] += 1
     with open(caminho, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False, separators=(",", ":"))
     return contagem
