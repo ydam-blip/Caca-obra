@@ -114,7 +114,7 @@ dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
 .local{font-size:14px;display:grid;gap:2px;background:var(--bg);border-radius:8px;padding:8px 10px}
 .local .ref{color:var(--muted);font-size:13px}
 .prec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.prec.rua{color:var(--ok)} .prec.bairro{color:var(--media)} .prec.cidade{color:var(--alta)}
+.prec.rua,.prec.via{color:var(--ok)} .prec.bairro{color:var(--media)} .prec.cidade{color:var(--alta)}
 .mini.waze{border-color:#33ccff;color:#0a7ea8}
 .vista{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .vista button{border:0;background:var(--surface);padding:5px 12px;font-weight:600;cursor:pointer}
@@ -254,7 +254,7 @@ function filtrar(){
    .filter(o=>!st.ocultar||(marcas[o.id]||{}).s!=="Descartada");
 }
 function rotas(o){
-  const exato=(o.precisao==="rua"||o.precisao==="bairro")&&o.lat!=null;
+  const exato=["rua","via","bairro"].includes(o.precisao)&&o.lat!=null;
   const txt=[o.endereco,o.municipio,o.uf].filter(Boolean).join(", ");
   return{waze:exato?`https://waze.com/ul?ll=${o.lat},${o.lon}&navigate=yes`:`https://waze.com/ul?q=${encodeURIComponent(txt)}&navigate=yes`,
     gmaps:exato?`https://www.google.com/maps/search/?api=1&query=${o.lat},${o.lon}`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(txt)}`}}
@@ -272,7 +272,7 @@ function desenharMapa(){
   if(!MAPA)return; if(GRUPO)MAPA.removeLayer(GRUPO);
   GRUPO=L.markerClusterGroup({maxClusterRadius:35,spiderfyOnMaxZoom:true,showCoverageOnHover:false});
   const cor={alta:"#c2410c",media:"#a16207",baixa:"#4b6b84"};const pts=[];
-  ULTIMA.filter(o=>o.lat!=null).forEach(o=>{const ap=!(o.precisao==="rua"||o.precisao==="bairro");
+  ULTIMA.filter(o=>o.lat!=null).forEach(o=>{const ap=!["rua","via","bairro"].includes(o.precisao);
     const m=L.circleMarker([o.lat,o.lon],{radius:ap?7:9,color:cor[o.prioridade]||"#555",weight:ap?2:3,dashArray:ap?"3 3":null,fillColor:cor[o.prioridade]||"#555",fillOpacity:ap?0.15:0.85});
     const r=rotas(o);
     m.bindPopup(`<b>${esc(o.nome)}</b><br>${esc(o.endereco||o.municipio)}${o.referencia?`<br><small>${esc(o.referencia)}</small>`:""}<br><small>${ap?"Local aproximado (centro da cidade)":"Local no mapa"}</small><br><a href="${r.waze}" target="_blank" rel="noopener">Abrir no Waze</a> · <a href="${r.gmaps}" target="_blank" rel="noopener">Maps</a>`);
@@ -306,7 +306,7 @@ function ficha(o){
   const linhas=[["Dono",o.responsavel],["Construtora",o.construtora],["Valor",o.valor],["Previsão",o.previsao],["Endereço da construtora",o.endereco_construtora]].filter(([,v])=>v&&v!=="—"&&v!=="Não informada");
   const {waze,gmaps}=rotas(o);
   const prec=o.precisao||(o.endereco?"":"cidade");
-  const precTxt={rua:"Endereço localizado",bairro:"Bairro localizado",cidade:"Local aproximado (só a cidade) – confirme"}[prec]||"";
+  const precTxt={rua:"Endereço exato no mapa",via:"Rua localizada – número a confirmar",bairro:"Só o bairro – confirme a rua",cidade:"Local aproximado (só a cidade) – confirme"}[prec]||"";
   const local=`<div class="local">${precTxt?`<span class="prec ${prec}">${precTxt}</span>`:""}<span>${esc([o.endereco,o.bairro&&!norm(o.endereco).includes(norm(o.bairro))?"Bairro "+o.bairro:""].filter(Boolean).join(" – ")||o.municipio)}</span>${o.referencia?`<span class="ref">Referência: ${esc(o.referencia)}</span>`:""}</div>`;
   return `<article class="ficha ${o.prioridade} ${m.s==="Descartada"?"desc":""}">
    <div class="faixa"></div><div class="corpo">

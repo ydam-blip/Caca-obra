@@ -11,7 +11,7 @@ ponto de referência perto dela.
 - Referência: o lugar com nome mais perto do ponto (escola, igreja, mercado, posto,
   praça, hospital…) num raio de 400 m, via Overpass (OpenStreetMap).
 
-Cada obra ganha: lat, lon, precisao ("rua" | "bairro" | "cidade"), bairro, referencia.
+Cada obra ganha: lat, lon, precisao ("rua" = ponto exato | "via" = rua sem número | "bairro" | "cidade"), bairro, referencia.
 """
 import json, math, os, re, time, unicodedata, urllib.parse, urllib.request
 
@@ -94,11 +94,14 @@ def _geocodificar(q, cache):
     if res:
         r = res[0]
         a = r.get("address", {})
-        tipo = r.get("addresstype") or r.get("type") or ""
-        if tipo in ("house", "building", "road", "amenity", "construction", "industrial", "commercial",
-                    "residential", "highway", "leisure", "tourism", "shop", "office", "place", "man_made"):
-            prec = "rua"
-        elif tipo in ("suburb", "neighbourhood", "quarter", "city_district", "hamlet", "village", "isolated_dwelling"):
+        cat, tipo, atipo = r.get("category") or "", r.get("type") or "", r.get("addresstype") or ""
+        if a.get("house_number") or cat in ("building", "amenity", "shop", "office", "tourism", "leisure", "man_made", "craft") \
+                or atipo in ("house", "building", "amenity", "shop", "industrial", "commercial"):
+            prec = "rua"          # ponto exato (número ou lugar com nome)
+        elif cat in ("highway", "railway") or atipo == "road":
+            prec = "via"          # a rua certa, mas sem o número
+        elif cat == "landuse" or atipo in ("suburb", "neighbourhood", "quarter", "city_district", "hamlet", "village",
+                                           "isolated_dwelling", "residential", "allotments"):
             prec = "bairro"
         else:
             prec = "cidade"
@@ -146,11 +149,13 @@ def localizar(obras, municipios_por_nome, pasta_dados, limite=400):
     if os.path.exists(caminho):
         with open(caminho, encoding="utf-8") as f:
             cache = json.load(f)
+    if cache.get("versao") != 2:
+        cache = {"versao": 2}
     geo, refs = cache.setdefault("geo", {}), cache.setdefault("ref", {})
     feitas = 0
-    contagem = {"rua": 0, "bairro": 0, "cidade": 0}
+    contagem = {"rua": 0, "via": 0, "bairro": 0, "cidade": 0}
     for o in obras:
-        if o.get("precisao") in ("rua", "bairro") and o.get("lat") and o.get("geo_ok"):
+        if o.get("precisao") in ("rua", "via", "bairro") and o.get("lat") and o.get("geo_ok"):
             contagem[o["precisao"]] += 1
             continue
         mun_nome = (o.get("municipio") or "").split("/")[0].strip()
@@ -166,13 +171,14 @@ def localizar(obras, municipios_por_nome, pasta_dados, limite=400):
                 novo = q not in geo
                 r = _geocodificar(q, geo)
                 feitas += 1 if novo else 0
-                if r and _dist(centro["lat"], centro["lon"], r["lat"], r["lon"]) <= MAX_KM_DO_CENTRO and r["precisao"] != "cidade":
+                if r and _dist(centro["lat"], centro["lon"], r["lat"], r["lon"]) <= MAX_KM_DO_CENTRO and r["precisao"] != "cidade" \
+                        and not (r["precisao"] == "bairro" and _norm(r["bairro"] or "") in ("", _norm(mun_nome))):
                     resultado = r
                     break
         if resultado:
             o.update(lat=round(resultado["lat"], 5), lon=round(resultado["lon"], 5), precisao=resultado["precisao"],
                      bairro=resultado["bairro"], geo_ok=True)
-            if resultado["precisao"] == "rua":
+            if resultado["precisao"] in ("rua", "via"):
                 o["referencia"] = _referencia(resultado["lat"], resultado["lon"], refs)
         else:
             o["precisao"] = "cidade"

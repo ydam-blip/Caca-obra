@@ -638,8 +638,7 @@
   "cnpj_construtora": "47737615000169",
   "endereco_construtora": "RUA DOARLY PADUA DOS SANTOS, 3930, INDUSTRIAL, VENANCIO AIRES/RS",
   "precisao": "bairro",
-  "bairro": "Lindos Ares",
-  "geo_ok": true
+  "bairro": "Lindos Ares"
  },
  {
   "id": "pncp-88117700000101-1-000329/2026",
@@ -993,7 +992,6 @@
   "primeira_vez": "2026-11-22",
   "precisao": "rua",
   "bairro": "Sarandi",
-  "geo_ok": true,
   "referencia": "perto de Escola João Goulart (~130 m)"
  },
  {
@@ -1025,7 +1023,6 @@
   "primeira_vez": "2026-11-22",
   "precisao": "rua",
   "bairro": "Piratini",
-  "geo_ok": true,
   "referencia": "perto de Posto BR (~150 m)"
  },
  {
@@ -1057,7 +1054,6 @@
   "primeira_vez": "2026-11-22",
   "precisao": "rua",
   "bairro": "Cidade Baixa",
-  "geo_ok": true,
   "referencia": "perto de Universidade São Leopoldo Mandic (~30 m)"
  },
  {
@@ -1089,7 +1085,6 @@
   "primeira_vez": "2026-11-22",
   "precisao": "rua",
   "bairro": "Hípica",
-  "geo_ok": true,
   "referencia": "perto de Mercado Caxias (~200 m)"
  },
  {
@@ -1676,7 +1671,6 @@
   "primeira_vez": "2026-11-22",
   "precisao": "rua",
   "bairro": "Fátima",
-  "geo_ok": true,
   "referencia": "perto de Igreja Santa Maria Madalena (~50 m)"
  },
  {
@@ -1940,7 +1934,6 @@
   "primeira_vez": "2026-11-22",
   "precisao": "rua",
   "bairro": "Lago Parque Clube",
-  "geo_ok": true,
   "referencia": ""
  },
  {
@@ -2323,8 +2316,7 @@
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
   "precisao": "bairro",
-  "bairro": "Concórdia",
-  "geo_ok": true
+  "bairro": "Concórdia"
  },
  {
   "id": "pncp-93802833000157-1-000105/2026",
