@@ -310,7 +310,7 @@ def converter(item, muni, hoje):
 
 
 # ---------------------------------------------------------------- Junção
-CAMPOS_SO_DO_ROBO = ("texto_extra", "geo_ok", "orgao_cnpj", "cnpj_construtora", "encerramento", "modalidade", "ibge")
+CAMPOS_SO_DO_ROBO = ("texto_extra", "geo_ok", "orgao_cnpj", "cnpj_construtora", "encerramento", "modalidade", "ibge", "duplicada_de")
 
 
 def ler_json(nome, padrao):
@@ -332,7 +332,7 @@ def gravar_json(nome, obj, compacto=False):
     os.replace(tmp, caminho)
 
 
-def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cnpj=dados_cnpj, localizar_obras=True):
+def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cnpj=dados_cnpj, localizar_obras=True, usar_cno=True):
     hoje = hoje or date.today()
     municipios = carregar_municipios()
     alvo = {}
@@ -398,7 +398,39 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
     gravar_json("obras_coletadas.json", coletadas)
 
     manuais = ler_json("obras_piloto.json", []) + ler_json("obras_manuais.json", [])
-    tudo = manuais + coletadas
+
+    # CNO – obras particulares registradas na Receita (via Base dos Dados); só roda com a chave GCP_CHAVE
+    cno_rel, cno_obras = {"status": "desligado"}, ler_json("obras_cno.json", [])
+    if usar_cno:
+        try:
+            import cno
+            linhas, cno_rel = cno.buscar(alvo, hoje)
+            if cno_rel.get("status") == "ok":
+                ant = {o["id"]: o for o in cno_obras}
+                novas = {}
+                for r in linhas:
+                    oid = f"cno-{r.get('id')}"
+                    o = ant.get(oid) or cno.converter(r, alvo, hoje, dados_cnpj)
+                    if o:
+                        o.setdefault("primeira_vez", hoje.isoformat())
+                        novas[oid] = o
+                limite_cno = (hoje - timedelta(days=365)).isoformat()
+                for oid, o in ant.items():
+                    if oid not in novas and (o.get("data_iso") or "9999") >= limite_cno:
+                        novas[oid] = o
+                cno_obras = list(novas.values())
+                gravar_json("obras_cno.json", cno_obras)
+        except Exception as e:  # o CNO nunca derruba a busca de licitações
+            cno_rel = {"status": "alerta", "motivo": f"{type(e).__name__}: {e}"[:300]}
+            print(f"CNO: erro {cno_rel['motivo']}", file=sys.stderr)
+    cruzadas = 0
+    if cno_obras:
+        import cno
+        for c in cno_obras:
+            c.pop("duplicada_de", None)
+        cruzadas = cno.cruzar(cno_obras, manuais + coletadas)
+    cno_rel["ja_na_lista"] = cruzadas
+    tudo = manuais + coletadas + [c for c in cno_obras if not c.get("duplicada_de")]
 
     # endereço exato + ponto de referência (OpenStreetMap)
     precisao = {}
@@ -408,6 +440,8 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
         precisao = localizar(tudo, por_nome, DADOS, texto_extra=texto_da_licitacao, endereco_orgao=endereco_do_orgao)
         print(f"Localização: {precisao}")
     gravar_json("obras_coletadas.json", coletadas)
+    if cno_obras:
+        gravar_json("obras_cno.json", cno_obras)
 
     # conferência da busca: se o PNCP não respondeu, avisa (o GitHub manda e-mail quando falha)
     alertas = []
@@ -415,6 +449,8 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
         alertas.append("O PNCP não devolveu nenhuma licitação nesta busca.")
     if ESTATISTICA["consultas"] and ESTATISTICA["falhas"] / ESTATISTICA["consultas"] > 0.3:
         alertas.append(f"{ESTATISTICA['falhas']} de {ESTATISTICA['consultas']} consultas ao PNCP falharam.")
+    if cno_rel.get("status") == "alerta":
+        alertas.append("A busca no CNO (obras particulares) falhou: " + str(cno_rel.get("motivo", "")))
     if brutos and not novos:
         alertas.append("Nenhuma licitação de obra encontrada na região (pode ser filtro ou falha).")
     relatorio = dict(
@@ -422,7 +458,7 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
         licitacoes_lidas=len(brutos), obras_pncp=len(coletadas),
         novas_semana=sum(1 for o in coletadas if o.get("primeira_vez") == hoje.isoformat()),
         com_vencedor=sum(1 for o in coletadas if o.get("fase") == "contratada"),
-        pesquisa_manual=len(manuais), localizacao=precisao,
+        pesquisa_manual=len(manuais), localizacao=precisao, cno=cno_rel,
         consultas=ESTATISTICA["consultas"], falhas=ESTATISTICA["falhas"])
     gravar_json("relatorio.json", relatorio)
     if alertas and not brutos:

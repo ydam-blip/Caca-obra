@@ -32,7 +32,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Buscar obras (PNCP + CNPJ)
+      - name: Instalar leitor do CNO
+        run: pip install --quiet google-cloud-bigquery
+      - name: Buscar obras (PNCP + CNPJ + CNO)
+        env:
+          GCP_CHAVE: ${{ secrets.GCP_CHAVE }}
         run: |
           if [ -n "${{ github.event.inputs.cidade }}" ]; then
             python3 coletor/coletar.py --cidade "${{ github.event.inputs.cidade }}" --uf "${{ github.event.inputs.uf }}" --raio "${{ github.event.inputs.raio }}"

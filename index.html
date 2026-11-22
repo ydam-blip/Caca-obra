@@ -374,7 +374,7 @@ function ficha(o){
    <div class="faixa"></div><div class="corpo">
     <div class="cab"><h3>${esc(o.nome)}</h3><span class="pri ${o.prioridade}">${({alta:"Alta",media:"Média",baixa:"Baixa"})[o.prioridade]||""}</span></div>
     <div class="lugar">${esc(o.municipio)}/${esc(o.uf)}${o.bairro?` · ${esc(o.bairro)}`:""}${o._d!=null?` · ${["cidade","orgao"].includes(o.precisao)?"~":""}${Math.round(o._d)} km`:""}</div>
-    <div class="tags"><span class="tag">${CAT[o.categoria]||o.categoria}</span>${o.porte?`<span class="tag">${PORTE[o.porte]||o.porte}</span>`:""}${novaSemana(o)?`<span class="tag nova">Nova</span>`:""}${o.minha?`<span class="tag">Anotada por mim</span>`:""}${ret}</div>
+    <div class="tags"><span class="tag">${CAT[o.categoria]||o.categoria}</span>${o.porte?`<span class="tag">${PORTE[o.porte]||o.porte}</span>`:""}${novaSemana(o)?`<span class="tag nova">Nova</span>`:""}${o.minha?`<span class="tag">Anotada por mim</span>`:""}${o.cno?`<span class="tag" title="Cadastro Nacional de Obras da Receita">CNO ${o.cno_area_m2||o.area_m2?Math.round(o.cno_area_m2||o.area_m2).toLocaleString("pt-BR")+" m²":"✔"}</span>`:""}${ret}</div>
     <div class="fases" aria-hidden="true">${fases}</div>
     <div class="fasetxt"><b>${esc((FASES.find(f=>f[0]===o.fase)||[,""])[1])}</b><span>${esc(o.fase_texto||"")}</span></div>
     ${linhas.length?`<dl>${linhas.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`:""}
