@@ -198,7 +198,7 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 const ls={get(k,d){try{const v=localStorage.getItem("cacaobra:"+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem("cacaobra:"+k,JSON.stringify(v))}catch(e){}}};
 
 let MUN=[],OBRAS=[],AO_VIVO=[],META={};
-let st=Object.assign({cidade:"Porto Alegre",uf:"RS",lat:-30.032,lon:-51.230,raio:60,cat:new Set(),fase:new Set(),porte:new Set(),pri:null,q:"",ordem:"pri",ocultar:true},ls.get("estado",{}));
+let st=Object.assign({cidade:"Porto Alegre",uf:"RS",lat:-30.032,lon:-51.206,raio:60,cat:new Set(),fase:new Set(),porte:new Set(),pri:null,q:"",ordem:"pri",ocultar:true},ls.get("estado",{}));
 st.cat=new Set(st.cat||[]);st.fase=new Set(st.fase||[]);st.porte=new Set(st.porte||[]);
 let marcas=ls.get("marcas",{}); // id -> {s:status,n:nota}
 let minhas=ls.get("minhas",[]);
@@ -212,7 +212,10 @@ function chips(el,itens,set,ch){el.innerHTML=itens.map(([k,v])=>`<button class="
 
 function telefones(txt){const out=[];(txt||"").replace(/(\(?\b(\d{2})\)?\s?)?(9?\d{4})[-\s]?(\d{4})\b|0800[-\s]?\d{3}[-\s]?\d{4}/g,(m,_,ddd,a,b)=>{
   if(m.startsWith("0800")){out.push({ver:m,tel:m.replace(/\D/g,""),wpp:null});return m}
-  if(!ddd)return m; const num=ddd+a+b; out.push({ver:m.trim(),tel:"+55"+num,wpp:a.length===5&&a[0]==="9"?"55"+num:null});return m});return out}
+  if(!ddd||ddd==="00")return m; const num=ddd+a+b;
+  // celular: 9 dígitos começando com 9, ou número antigo de 8 dígitos começando com 6-9 (ganha o 9 na frente)
+  const cel=a.length===5&&a[0]==="9"?num:(a.length===4&&"6789".includes(a[0])?ddd+"9"+a+b:null);
+  out.push({ver:m.trim(),tel:"+55"+(cel||num),wpp:cel?"55"+cel:null});return m});return out}
 
 function todas(){return [...OBRAS,...AO_VIVO.filter(a=>!OBRAS.some(o=>o.id===a.id)),...minhas]}
 
@@ -234,7 +237,7 @@ function render(){
   const novas=base.filter(novaSemana).length;
   $("#resumo").innerHTML=[["alta","Alta"],["media","Média"],["baixa","Baixa"]].map(([k,v])=>`<button class="tile ${k} ${st.pri===k?"on":""}" data-p="${k}"><b>${cont[k]||0}</b><small>${v}</small></button>`).join("")+`<button class="tile ${st.pri==="novas"?"on":""}" data-p="novas"><b>${novas}</b><small>Novas</small></button>`;
   let lista=base.filter(o=>!st.pri||(st.pri==="novas"?novaSemana(o):o.prioridade===st.pri));
-  const ord={pri:(a,b)=>(PRI_ORD[a.prioridade]-PRI_ORD[b.prioridade])||((a._d??999)-(b._d??999)),dist:(a,b)=>(a._d??999)-(b._d??999),rec:(a,b)=>String(b.primeira_vez||b.data_iso||"").localeCompare(String(a.primeira_vez||a.data_iso||""))};
+  const ord={pri:(a,b)=>(PRI_ORD[a.prioridade]-PRI_ORD[b.prioridade])||((a._d??999)-(b._d??999)),dist:(a,b)=>(a._d??999)-(b._d??999),rec:(a,b)=>String(b.data_iso||"").localeCompare(String(a.data_iso||""))};
   lista.sort(ord[st.ordem]);
   $("#contagem").textContent=`${lista.length} obra${lista.length===1?"":"s"} em ${st.cidade}/${st.uf} e até ${st.raio} km`;
   $("#lista").innerHTML=lista.length?lista.map(ficha).join(""):`<div class="vazio"><b>Nenhuma obra aqui ainda</b>Aumente o raio, limpe os filtros ou toque em “Buscar licitações agora”. Para pesquisar obras particulares numa região nova, peça no chat do projeto.</div>`;
@@ -260,7 +263,7 @@ function ficha(o){
     <textarea class="nota" data-nota="${esc(o.id)}" placeholder="Minha anotação…" rows="1">${esc(m.n||"")}</textarea>
     <div class="rod"><select data-status="${esc(o.id)}" aria-label="Situação">${STATUS.map(s=>`<option ${s===(m.s||"Nova")?"selected":""}>${s}</option>`).join("")}</select>
      <span class="row"><a class="mini" href="${mapa}" target="_blank" rel="noopener">Mapa</a>${o.fonte&&/^https?:/.test(o.fonte)?`<a class="mini" href="${esc(o.fonte)}" target="_blank" rel="noopener">Fonte</a>`:""}${o.minha?`<button class="mini" data-apaga="${esc(o.id)}">Apagar</button>`:""}</span></div>
-    <div style="font-size:12px;color:var(--muted)">${esc(o.origem||"")}${o.data_fonte?` · ${esc(o.data_fonte)}`:""}</div>
+    <div style="font-size:12px;color:var(--muted)">${esc(o.origem||"")}${o.data_fonte?` · ${esc(/^\d{4}-\d{2}-\d{2}/.test(o.data_fonte)?o.data_fonte.slice(0,10).split("-").reverse().join("/"):o.data_fonte)}`:""}</div>
    </div></article>`;
 }
 
@@ -320,7 +323,7 @@ function converter(it,m){const v=+(it.valorTotalEstimado||0);const enc=(it.dataE
    fase:"licitacao",fase_texto:enc?`Propostas até ${enc.split("-").reverse().join("/")}`:"Licitação aberta",prioridade:conc||porte==="grande"?"alta":porte==="medio"?"media":"baixa",porte,
    responsavel:it.orgaoEntidade?.razaoSocial||"",construtora:"A definir (licitação)",contato:"",valor:v?v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})+" (estimado)":"",
    dica:conc?"Compra direta de concreto: o órgão é o comprador.":"Procure as construtoras que estão disputando e ofereça orçamento para a proposta delas.",
-   fonte:mm?`https://pncp.gov.br/app/editais/${mm[1]}/${mm[3]}/${+mm[2]}`:"https://pncp.gov.br",data_fonte:(it.dataPublicacaoPncp||"").slice(0,10),origem:"PNCP (busca agora)",primeira_vez:new Date().toISOString().slice(0,10)}}
+   fonte:mm?`https://pncp.gov.br/app/editais/${mm[1]}/${mm[3]}/${+mm[2]}`:"https://pncp.gov.br",data_fonte:(it.dataPublicacaoPncp||"").slice(0,10),data_iso:(it.dataPublicacaoPncp||"").slice(0,10),origem:"PNCP (busca agora)",primeira_vez:new Date().toISOString().slice(0,10)}}
 
 /* obra anotada pelo usuário */
 $("#mCat").innerHTML=Object.entries(CAT).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
@@ -331,7 +334,7 @@ $("#modal").onclick=e=>{if(e.target.id==="modal")$("#modal").hidden=true};
 $("#form").onsubmit=e=>{e.preventDefault();const m=acharMun($("#mCidade").value);
   const o={id:"minha-"+Date.now(),minha:true,nome:$("#mNome").value.trim(),municipio:m?m[1]:$("#mCidade").value,uf:m?m[2]:st.uf,lat:m?m[3]:null,lon:m?m[4]:null,
    endereco:$("#mEnd").value,categoria:$("#mCat").value,fase:$("#mFase").value,fase_texto:"",prioridade:$("#mPri").value,porte:"",construtora:$("#mConst").value,contato:$("#mTel").value,
-   dica:$("#mObs").value,origem:"Anotada por mim",data_fonte:new Date().toLocaleDateString("pt-BR"),primeira_vez:new Date().toISOString().slice(0,10)};
+   dica:$("#mObs").value,origem:"Anotada por mim",data_fonte:new Date().toLocaleDateString("pt-BR"),data_iso:new Date().toISOString().slice(0,10),primeira_vez:new Date().toISOString().slice(0,10)};
   minhas.unshift(o);ls.set("minhas",minhas);$("#form").reset();$("#modal").hidden=true;render()};
 
 /* carregar dados */

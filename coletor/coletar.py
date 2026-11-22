@@ -213,7 +213,8 @@ def dados_cnpj(cnpj):
 
 
 def converter(item, muni, hoje):
-    objeto = (item.get("objetoCompra") or "").strip()
+    objeto = re.sub(r"\s+", " ", item.get("objetoCompra") or "").strip()
+    objeto = re.sub(r"^\[portal de compras p[uú]blicas\]\s*-\s*", "", objeto, flags=re.I)
     o = norm(objeto)
     valor = item.get("valorTotalEstimado") or item.get("valorTotalHomologado") or 0
     try:
@@ -264,6 +265,7 @@ def converter(item, muni, hoje):
         valor=(f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".") + " (estimado)") if valor else "",
         previsao="", dica=dica, fonte=link,
         data_fonte=(item.get("dataPublicacaoPncp") or "")[:10],
+        data_iso=(item.get("dataPublicacaoPncp") or "")[:10],
         encerramento=enc, origem="PNCP (automático)", modalidade=item.get("modalidadeNome") or "",
         _compra=item,
     )
@@ -317,7 +319,7 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
         ob["primeira_vez"] = antes.get("primeira_vez") or hoje.isoformat()
         # vencedor + contato (só para encerradas; reaproveita o que já sabíamos)
         if antes.get("construtora") and antes.get("construtora") not in ("", "A definir (licitação)"):
-            for k in ("construtora", "contato", "cnpj_construtora", "endereco_construtora"):
+            for k in ("construtora", "contato", "cnpj_construtora", "endereco_construtora", "fase", "fase_texto", "dica"):
                 if antes.get(k):
                     ob[k] = antes[k]
         elif ob["encerramento"] and ob["encerramento"] < hoje.isoformat():
@@ -343,7 +345,15 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
     for oid, o in anteriores.items():
         if oid not in novos and e_obra(o.get("nome")) and (o.get("encerramento") or o.get("data_fonte") or "9999") >= limite:
             novos[oid] = o
-    coletadas = sorted(novos.values(), key=lambda o: (o.get("primeira_vez") or "", o.get("data_fonte") or ""), reverse=True)
+    # a mesma licitação às vezes é publicada mais de uma vez (republicação, lotes): fica a mais nova
+    unicas = {}
+    for o in sorted(novos.values(), key=lambda o: o.get("data_iso") or o.get("data_fonte") or ""):
+        chave = (norm(o.get("responsavel"))[:60], norm(o.get("nome"))[:160])
+        antiga = unicas.get(chave)
+        if antiga and antiga.get("fase") == "contratada" and o.get("fase") != "contratada":
+            continue
+        unicas[chave] = o
+    coletadas = sorted(unicas.values(), key=lambda o: (o.get("primeira_vez") or "", o.get("data_iso") or ""), reverse=True)
     gravar_json("obras_coletadas.json", coletadas)
 
     manuais = ler_json("obras_piloto.json", []) + ler_json("obras_manuais.json", [])

@@ -21,7 +21,8 @@
   "dica": "Piso industrial de 200 mil m² = enorme volume de concreto. Prioridade nº 1 de visita.",
   "fonte": "https://www.infodovale.com.br/2026/09/jussara-recebe-projeto-inicial-do.html",
   "data_fonte": "30/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-30"
  },
  {
   "id": "piloto-4e8181d8",
@@ -45,7 +46,8 @@
   "dica": "Pode ser o mesmo complexo da BRL VI; confirmar. Volume muito alto.",
   "fonte": "https://www.jornaldocomercio.com/mapa-economico/regiao-metropolitana/2026/07/1253527-cachoeirinha-e-gravatai-atraem-investimentos-de-condominios-logisticos.html",
   "data_fonte": "01/07/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-07-01"
  },
  {
   "id": "piloto-f42a2cd7",
@@ -69,7 +71,8 @@
   "dica": "Fase final; ainda há pisos e pátios. Bom para abrir relacionamento para próximos projetos.",
   "fonte": "https://maismateria.com.br/gravatai-amplia-polo-logistico-com-investimento-previsto-de-r-550-milhoes/",
   "data_fonte": "11/02/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-02-11"
  },
  {
   "id": "piloto-c7ee61a3",
@@ -93,7 +96,8 @@
   "dica": "Chegar antes da escolha de fornecedores.",
   "fonte": "https://maismateria.com.br/gravatai-amplia-polo-logistico-com-investimento-previsto-de-r-550-milhoes/",
   "data_fonte": "11/02/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-02-11"
  },
  {
   "id": "piloto-9c5b5f0c",
@@ -105,7 +109,7 @@
   "lon": -51.186,
   "endereco": "Canoas",
   "categoria": "infraestrutura",
-  "fase": "licitacao",
+  "fase": "contratada",
   "fase_texto": "Licitação já realizada – obra deve iniciar",
   "prioridade": "alta",
   "responsavel": "Prefeitura de Canoas",
@@ -117,7 +121,8 @@
   "dica": "Obra começando: descobrir a vencedora e visitar já.",
   "fonte": "https://www.gov.br/casacivil/pt-br/assuntos/noticias/2026/setembro/governo-federal-da-novas-autorizacoes-para-obras-de-reconstrucao-do-rio-grande-do-sul",
   "data_fonte": "11/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-11"
  },
  {
   "id": "piloto-508c1d37",
@@ -129,7 +134,7 @@
   "lon": -51.619,
   "endereco": "Eldorado do Sul",
   "categoria": "infraestrutura",
-  "fase": "licitacao",
+  "fase": "projeto",
   "fase_texto": "Autorizado para licitação; edital previsto 2026–2027",
   "prioridade": "alta",
   "responsavel": "Prefeitura de Eldorado do Sul (Firece + Funrigs)",
@@ -141,7 +146,8 @@
   "dica": "Uma das maiores obras da região. Acompanhar edital e oferecer contrato de fornecimento de longo prazo.",
   "fonte": "https://www.gov.br/casacivil/pt-br/assuntos/noticias/2026/setembro/governo-federal-da-novas-autorizacoes-para-obras-de-reconstrucao-do-rio-grande-do-sul",
   "data_fonte": "26/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-26"
  },
  {
   "id": "piloto-7afd6566",
@@ -165,7 +171,8 @@
   "dica": "Muito concreto (galerias, casa de bombas, reservatório). Prioridade máxima: mapear as empresas pré-qualificadas.",
   "fonte": "https://prefeitura.poa.br/gp/noticias/prefeitura-inicia-contratacao-da-ampliacao-do-sistema-de-drenagem-e-requalificacao-do",
   "data_fonte": "30/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-30"
  },
  {
   "id": "piloto-4de9a702",
@@ -177,7 +184,7 @@
   "lon": -51.206,
   "endereco": "Anchieta e Sarandi",
   "categoria": "infraestrutura",
-  "fase": "projeto",
+  "fase": "contratada",
   "fase_texto": "Obra definitiva autorizada; instrumento assinado",
   "prioridade": "alta",
   "responsavel": "Prefeitura de Porto Alegre / DMAE",
@@ -189,7 +196,8 @@
   "dica": "Estações de bombeamento usam muito concreto estrutural.",
   "fonte": "https://www.em.com.br/mundo-corporativo/2026/11/7533586-solo-mole-desafia-perfuracao-em-obras-contra-cheias-no-rs.html",
   "data_fonte": "05/11/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-05"
  },
  {
   "id": "piloto-f6f3f661",
@@ -201,7 +209,7 @@
   "lon": -51.206,
   "endereco": "Porto Alegre",
   "categoria": "infraestrutura",
-  "fase": "licitacao",
+  "fase": "projeto",
   "fase_texto": "Licitação autorizada",
   "prioridade": "alta",
   "responsavel": "Prefeitura de Porto Alegre / DMAE",
@@ -213,7 +221,8 @@
   "dica": "Acompanhar edital no DOPA.",
   "fonte": "https://www.gov.br/casacivil/pt-br/assuntos/noticias/2026/setembro/governo-federal-da-novas-autorizacoes-para-obras-de-reconstrucao-do-rio-grande-do-sul",
   "data_fonte": "11/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-11"
  },
  {
   "id": "piloto-2c6729dc",
@@ -225,7 +234,7 @@
   "lon": -51.15,
   "endereco": "Bairro Santos Dumont",
   "categoria": "infraestrutura",
-  "fase": "licitacao",
+  "fase": "projeto",
   "fase_texto": "Edital previsto out/nov 2026; início previsto fim de 2026",
   "prioridade": "alta",
   "responsavel": "Prefeitura de São Leopoldo (Firece/Caixa)",
@@ -237,7 +246,8 @@
   "dica": "Etapa 1 é da Construsinos; Etapa 3 (casa de bombas) vem depois.",
   "fonte": "https://www.abcmais.com/brasil/rio-grande-do-sul/vale-do-rio-dos-sinos/sao-leopoldo/novo-edital-para-obras-de-protecao-as-cheias-deve-sair-nos-proximos-dias/",
   "data_fonte": "13/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-13"
  },
  {
   "id": "piloto-84d746c4",
@@ -261,7 +271,8 @@
   "dica": "Obra média com laje e piso; fale com as construtoras que retirarem o edital.",
   "fonte": "https://alertalicitacao.com.br/!licitacao/DOU-70e061254eed74d155fb",
   "data_fonte": "nov/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-01"
  },
  {
   "id": "piloto-23bc3f01",
@@ -285,7 +296,8 @@
   "dica": "Mesma licitação-irmã da UBS Natal 2; possível mesma vencedora (2 obras num cliente).",
   "fonte": "https://alertalicitacao.com.br/!licitacao/DOU-4ec251cfa105d70bd002",
   "data_fonte": "nov/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-01"
  },
  {
   "id": "piloto-ad01616a",
@@ -309,7 +321,8 @@
   "dica": "Acompanhar quem vence os 2 lotes e oferecer concreto para fundações e estrutura de 11 obras.",
   "fonte": "https://www.encontraportoalegre.com.br/sobre/poa-futura-lancada-licitacao-para-construir-11-equipamentos-publicos-com-recursos-do-bid/",
   "data_fonte": "04/11/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-04"
  },
  {
   "id": "piloto-a409f2b6",
@@ -333,7 +346,8 @@
   "dica": "Concisa tem ~10 obras: negociar contrato anual.",
   "fonte": "https://construtoraconcisa.com.br/lancamentos-concisa/",
   "data_fonte": "29/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-29"
  },
  {
   "id": "piloto-9b3808e8",
@@ -357,7 +371,8 @@
   "dica": "Flex tem 5 obras na região: cliente-chave para negociar volume.",
   "fonte": "https://amanha.com.br/empresa/flex-investira-rs-80-milhoes-em-novo-empreendimento-residencial-em-canoas",
   "data_fonte": "23/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-23"
  },
  {
   "id": "piloto-9114ea72",
@@ -381,7 +396,8 @@
   "dica": "Fase de fundação/estrutura: momento ideal.",
   "fonte": "https://agenciagbc.com/2026/07/12/construtora-minha-casa-minha-vida-canoas/",
   "data_fonte": "12/07/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-07-12"
  },
  {
   "id": "piloto-0ae68509",
@@ -393,7 +409,7 @@
   "lon": -51.186,
   "endereco": "Rio Branco",
   "categoria": "predio",
-  "fase": "projeto",
+  "fase": "lancamento",
   "fase_texto": "Em comercialização; próximos condomínios 2027 e 2028",
   "prioridade": "alta",
   "responsavel": "MRV",
@@ -405,7 +421,8 @@
   "dica": "MRV compra por central; abordar a regional Sul.",
   "fonte": "https://agenciagbc.com/2026/05/10/construtora-vai-investir-mais-de-r-70-milhoes-em-canoas/",
   "data_fonte": "10/05/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-05-10"
  },
  {
   "id": "piloto-d88c382c",
@@ -429,7 +446,8 @@
   "dica": "Chegar cedo, antes da contratação da construtora.",
   "fonte": "https://jornaltimoneiro.com.br/index.php/2026/10/15/bold-incorporadora-1-bilhao-novos-empreendimentos-canoas/",
   "data_fonte": "15/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-15"
  },
  {
   "id": "piloto-96d23e26",
@@ -453,7 +471,8 @@
   "dica": "Obra no início: toda a estrutura pela frente.",
   "fonte": "https://construtoraconcisa.com.br/lancamentos-concisa/",
   "data_fonte": "29/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-29"
  },
  {
   "id": "piloto-2381e862",
@@ -477,7 +496,8 @@
   "dica": "Complexo de 8 fases e 20 torres: contrato de longo prazo.",
   "fonte": "https://exame.com/mercado-imobiliario/bairro-privativo-de-luxo-em-porto-alegre-tera-apartamento-de-r-28-milhoes/",
   "data_fonte": "28/08/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-08-28"
  },
  {
   "id": "piloto-940b4612",
@@ -501,7 +521,8 @@
   "dica": "Obra recém-iniciada e grande. 2MS também faz o Maias I em POA: cliente-chave.",
   "fonte": "https://jornaltimoneiro.com.br/index.php/2026/10/06/canoas-inicia-construcao-residencial-nazario-807-moradias/",
   "data_fonte": "06/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-06"
  },
  {
   "id": "piloto-25a5d961",
@@ -513,7 +534,7 @@
   "lon": -51.206,
   "endereco": "Zona Norte",
   "categoria": "residencial",
-  "fase": "em_obra",
+  "fase": "projeto",
   "fase_texto": "Contratação autorizada (mar/2025) – verificar andamento",
   "prioridade": "alta",
   "responsavel": "Prefeitura de POA / FAR",
@@ -525,7 +546,8 @@
   "dica": "Mesmo cliente 2MS.",
   "fonte": "https://prefeitura.poa.br/gp/noticias/autorizada-construcao-de-residencial-com-768-moradias-para-familias-atingidas-pela",
   "data_fonte": "21/03/2025",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2025-03-21"
  },
  {
   "id": "piloto-cd274cce",
@@ -549,7 +571,8 @@
   "dica": "Chegar na LBF antes da obra começar.",
   "fonte": "https://poa24horas.com.br/oportunidades/2026/11/bairro-partenon-pode-ganhar-144-novas-moradias-do-minha-casa-minha-vida-em-porto-alegre/",
   "data_fonte": "19/11/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-19"
  },
  {
   "id": "piloto-0233a5f9",
@@ -561,7 +584,7 @@
   "lon": -50.987,
   "endereco": "Área de 100 mil m² perto da divisa com Cachoeirinha",
   "categoria": "industrial",
-  "fase": "em_obra",
+  "fase": "projeto",
   "fase_texto": "Compra de área em andamento",
   "prioridade": "media",
   "responsavel": "Bresco Logística (SP)",
@@ -573,7 +596,8 @@
   "dica": "Bresco já opera em Canoas: contato comercial via unidade de Canoas.",
   "fonte": "https://maismateria.com.br/gravatai-amplia-polo-logistico-com-investimento-previsto-de-r-550-milhoes/",
   "data_fonte": "11/02/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-02-11"
  },
  {
   "id": "piloto-afbb6da6",
@@ -597,7 +621,8 @@
   "dica": "LOG tem construção própria; falar com suprimentos da LOG.",
   "fonte": "https://www.oreporter.net/log-prepara-investimento-de-r-280-milhoes-em-novo-condominio-logistico-em-gravatai/",
   "data_fonte": "07/07/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-07-07"
  },
  {
   "id": "piloto-6ab66615",
@@ -621,7 +646,8 @@
   "dica": "Provavelmente contratada em 2026; confirmar vencedora.",
   "fonte": "https://sedur.rs.gov.br/governador-eduardo-leite-anuncia-avancos-na-duplicacao-da-estrada-caminho-do-meio-nos-trechos-de-alvorada-e-viamao",
   "data_fonte": "15/01/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-01-15"
  },
  {
   "id": "piloto-ab383be4",
@@ -645,7 +671,8 @@
   "dica": "Corsan contrata empreiteiras terceirizadas; procurar o setor de suprimentos da Aegea.",
   "fonte": "https://www.jornaldocomercio.com/jornal-cidades/2026/11/1270835-corsan-investe-rs-4012-milhoes-em-esgoto-na-regiao-metropolitana.html",
   "data_fonte": "17/11/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-17"
  },
  {
   "id": "piloto-ca3fd0bc",
@@ -669,7 +696,8 @@
   "dica": "Viadutos e pontes = concreto estrutural. Confirmar construtoras no DNIT/PNCP.",
   "fonte": "https://www.esteio.rs.leg.br/institucional/noticias/dnit-anuncia-obras-na-br-116-de-porto-alegre-ate-novo-hamburgo",
   "data_fonte": "2026 (data não exibida)",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": ""
  },
  {
   "id": "piloto-a46f345d",
@@ -681,7 +709,7 @@
   "lon": -51.206,
   "endereco": "Entre Av. Saturnino de Brito e divisa com Alvorada",
   "categoria": "infraestrutura",
-  "fase": "licitacao",
+  "fase": "projeto",
   "fase_texto": "Anteprojeto pronto; aguarda edital",
   "prioridade": "media",
   "responsavel": "Governo do RS (Sedur) / Prefeitura POA",
@@ -693,7 +721,8 @@
   "dica": "Lead futuro; monitorar DOE.",
   "fonte": "https://sedur.rs.gov.br/governador-eduardo-leite-anuncia-avancos-na-duplicacao-da-estrada-caminho-do-meio-nos-trechos-de-alvorada-e-viamao",
   "data_fonte": "15/01/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-01-15"
  },
  {
   "id": "piloto-a9208e1d",
@@ -717,7 +746,8 @@
   "dica": "Obra em andamento com canalização: concreto contínuo até 2027.",
   "fonte": "https://www.abcmais.com/brasil/rio-grande-do-sul/vale-do-rio-dos-sinos/sao-leopoldo/novo-edital-para-obras-de-protecao-as-cheias-deve-sair-nos-proximos-dias/",
   "data_fonte": "13/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-13"
  },
  {
   "id": "piloto-01594ef5",
@@ -741,7 +771,8 @@
   "dica": "Pontes, bueiros, meio-fio e calçadas. Descobrir construtora no site da Sedur.",
   "fonte": "https://sedur.rs.gov.br/governador-eduardo-leite-anuncia-avancos-na-duplicacao-da-estrada-caminho-do-meio-nos-trechos-de-alvorada-e-viamao",
   "data_fonte": "15/01/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-01-15"
  },
  {
   "id": "piloto-498a68c6",
@@ -765,7 +796,8 @@
   "dica": "Idem.",
   "fonte": "https://www.jornaldocomercio.com/jornal-cidades/2026/11/1270835-corsan-investe-rs-4012-milhoes-em-esgoto-na-regiao-metropolitana.html",
   "data_fonte": "17/11/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-17"
  },
  {
   "id": "piloto-b8739806",
@@ -789,7 +821,8 @@
   "dica": "Reforma: volume menor (pisos, reforços). Contatar Elmo e a vencedora da 2ª fase.",
   "fonte": "https://www.canoas.rs.gov.br/licitacoes/edital-no-17-2026-elaboracao-dos-projetos-basicos-e-executivos-para-a-execucao-da-segunda-fase-da-obra-de-reforma-do-hospital-de-pronto-socorro-de-canoas-hpsc/",
   "data_fonte": "19/08/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-08-19"
  },
  {
   "id": "piloto-4973e496",
@@ -800,8 +833,8 @@
   "lat": -29.913,
   "lon": -51.186,
   "endereco": "15 ruas (não detalhado)",
-  "categoria": "obra_publica",
-  "fase": "lancamento",
+  "categoria": "infraestrutura",
+  "fase": "projeto",
   "fase_texto": "Projeto lançado 19/11/2026",
   "prioridade": "media",
   "responsavel": "Prefeitura de Canoas (contrato R$ 150 mi com BB p/ infraestrutura)",
@@ -813,7 +846,8 @@
   "dica": "Pavimento é quase todo asfalto, mas meio-fio, sarjeta, calçada e drenagem usam concreto.",
   "fonte": "https://jornaltimoneiro.com.br/",
   "data_fonte": "19/11/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-19"
  },
  {
   "id": "piloto-0a2d9b17",
@@ -837,7 +871,8 @@
   "dica": "Mesmo cliente Flex.",
   "fonte": "https://jornaltimoneiro.com.br/index.php/2026/10/13/flex-tres-empreendimentos-construcao-canoas/",
   "data_fonte": "13/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-13"
  },
  {
   "id": "piloto-b180cc8e",
@@ -861,7 +896,8 @@
   "dica": "Mesmo cliente Flex.",
   "fonte": "https://jornaltimoneiro.com.br/index.php/2026/10/13/flex-tres-empreendimentos-construcao-canoas/",
   "data_fonte": "13/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-13"
  },
  {
   "id": "piloto-3227e28c",
@@ -885,7 +921,8 @@
   "dica": "Mesmo cliente.",
   "fonte": "https://construtoraconcisa.com.br/lancamentos-concisa/",
   "data_fonte": "29/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-29"
  },
  {
   "id": "piloto-0034f8e0",
@@ -909,7 +946,8 @@
   "dica": "Mesmo cliente.",
   "fonte": "https://construtoraconcisa.com.br/lancamentos-concisa/",
   "data_fonte": "29/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-29"
  },
  {
   "id": "piloto-e6c55a3d",
@@ -933,7 +971,8 @@
   "dica": "Estrutura em andamento.",
   "fonte": "https://exame.com/mercado-imobiliario/bairro-privativo-de-luxo-em-porto-alegre-tera-apartamento-de-r-28-milhoes/",
   "data_fonte": "28/08/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-08-28"
  },
  {
   "id": "piloto-0879e996",
@@ -957,7 +996,8 @@
   "dica": "Melnick tem 7 obras em POA; abordar engenharia/suprimentos da Melnick.",
   "fonte": "https://moveup.imb.br/colecao-prime-melnick/",
   "data_fonte": "nov/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-01"
  },
  {
   "id": "piloto-f0d0de20",
@@ -981,7 +1021,8 @@
   "dica": "Idem.",
   "fonte": "https://moveup.imb.br/colecao-prime-melnick/",
   "data_fonte": "nov/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-01"
  },
  {
   "id": "piloto-b302661d",
@@ -1005,7 +1046,8 @@
   "dica": "Idem.",
   "fonte": "https://moveup.imb.br/colecao-prime-melnick/",
   "data_fonte": "nov/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-01"
  },
  {
   "id": "piloto-be2e119e",
@@ -1029,7 +1071,8 @@
   "dica": "Idem.",
   "fonte": "https://moveup.imb.br/colecao-prime-melnick/",
   "data_fonte": "nov/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-01"
  },
  {
   "id": "piloto-4581d693",
@@ -1053,7 +1096,8 @@
   "dica": "Menino Deus concentra ~27% dos lançamentos de POA.",
   "fonte": "https://jornaldacapital.com.br/jornal-da-capital/com-infraestrutura-completa-e-alto-potencial-de-valorizacao-cyrela-goldsztein-lanca-skyline-menino-deus/",
   "data_fonte": "18/11/2025",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2025-11-18"
  },
  {
   "id": "piloto-459293d2",
@@ -1077,7 +1121,8 @@
   "dica": "Infra do loteamento agora + 153 casas futuras (venda a pequenos construtores).",
   "fonte": "https://www.abcmais.com/economia/condominio-com-primeira-praia-artificial-de-canos-lanca-nova-etapa-de-obras/",
   "data_fonte": "10/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-10"
  },
  {
   "id": "piloto-e384ecb8",
@@ -1101,7 +1146,8 @@
   "dica": "Confirmar construtora.",
   "fonte": "https://jornaltimoneiro.com.br/index.php/2026/10/06/canoas-inicia-construcao-residencial-nazario-807-moradias/",
   "data_fonte": "06/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-06"
  },
  {
   "id": "piloto-20c68cef",
@@ -1125,7 +1171,8 @@
   "dica": "Só monitorar.",
   "fonte": "https://www.jornaldocomercio.com/mapa-economico/regiao-metropolitana/2026/07/1253527-cachoeirinha-e-gravatai-atraem-investimentos-de-condominios-logisticos.html",
   "data_fonte": "01/07/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-07-01"
  },
  {
   "id": "piloto-850bd383",
@@ -1149,7 +1196,8 @@
   "dica": "Provavelmente já pronta; manter para expansões.",
   "fonte": "https://www.jornaldocomercio.com/especiais/anuario-de-investimentos/2026/07/1256637-empresa-investe-rs-140-milhoes-em-fabrica-de-chapas-de-aco-em-porto-alegre.html",
   "data_fonte": "17/07/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-07-17"
  },
  {
   "id": "piloto-7f7bef7d",
@@ -1173,7 +1221,8 @@
   "dica": "Idem.",
   "fonte": "https://www.jornaldocomercio.com/jornal-cidades/2026/11/1270835-corsan-investe-rs-4012-milhoes-em-esgoto-na-regiao-metropolitana.html",
   "data_fonte": "17/11/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-17"
  },
  {
   "id": "piloto-885eb34e",
@@ -1185,7 +1234,7 @@
   "lon": -51.206,
   "endereco": "Gasômetro à Rodoviária, 3 km",
   "categoria": "infraestrutura",
-  "fase": "licitacao",
+  "fase": "projeto",
   "fase_texto": "Concessão anterior será revogada; novo edital previsto",
   "prioridade": "baixa",
   "responsavel": "Governo do RS (Sec. Parcerias)",
@@ -1197,7 +1246,8 @@
   "dica": "Lead de longo prazo; só monitorar.",
   "fonte": "https://www.jornaldocomercio.com/colunas/pensar-a-cidade/2026/05/1247305-vice-governador-do-rs-estima-que-novo-edital-para-concessao-do-cais-maua-saia-ainda-em-2026.html",
   "data_fonte": "04/05/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-05-04"
  },
  {
   "id": "piloto-8c84fdc1",
@@ -1208,7 +1258,7 @@
   "lat": -29.941,
   "lon": -50.987,
   "endereco": "Ruas 25 de Fevereiro e Imigrantes",
-  "categoria": "obra_publica",
+  "categoria": "infraestrutura",
   "fase": "em_obra",
   "fase_texto": "Contratada (homologada 23/09/2026) – obra em andamento",
   "prioridade": "baixa",
@@ -1221,7 +1271,8 @@
   "dica": "Construsinos também tem a obra de São Leopoldo: cliente com 2 obras na região.",
   "fonte": "https://www.portaldecompraspublicas.com.br/processos/RS/Prefeitura-Municipal-de-Gravatai-44/CPMP-6-2026-2026-492813",
   "data_fonte": "23/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-23"
  },
  {
   "id": "piloto-4fd14db1",
@@ -1245,7 +1296,8 @@
   "dica": "Pisos e bases.",
   "fonte": "https://alertalicitacao.com.br/!licitacao/BRS-357640",
   "data_fonte": "out/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-01"
  },
  {
   "id": "piloto-d6e4ebe4",
@@ -1256,7 +1308,7 @@
   "lat": -29.852,
   "lon": -51.284,
   "endereco": "Loteamento Recanto do Sol",
-  "categoria": "obra_publica",
+  "categoria": "infraestrutura",
   "fase": "licitacao",
   "fase_texto": "Licitação aberta em 27/10/2026 – ver vencedor",
   "prioridade": "baixa",
@@ -1269,7 +1321,8 @@
   "dica": "Meio-fio e drenagem.",
   "fonte": "https://alertalicitacao.com.br/!licitacao/BRS-357969",
   "data_fonte": "out/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-01"
  },
  {
   "id": "piloto-b4db9a38",
@@ -1280,8 +1333,8 @@
   "lat": -29.688,
   "lon": -51.133,
   "endereco": "Av. dos Municípios",
-  "categoria": "obra_publica",
-  "fase": "projeto",
+  "categoria": "infraestrutura",
+  "fase": "contratada",
   "fase_texto": "Contratada (homologada 30/09/2026)",
   "prioridade": "baixa",
   "responsavel": "Prefeitura de Novo Hamburgo",
@@ -1293,7 +1346,8 @@
   "dica": "Obra pequena; contato rápido com a empreiteira.",
   "fonte": "https://www.portaldecompraspublicas.com.br/processos/RS/Prefeitura-Municipal-de-Novo-Hamburgo-43/CPMP-18-2026-2026-506925",
   "data_fonte": "30/09/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-09-30"
  },
  {
   "id": "piloto-bf65e0e4",
@@ -1317,7 +1371,8 @@
   "dica": "Objeto cita CONCRETO POLIDO: venda direta de concreto. Descobrir vencedor.",
   "fonte": "https://alertalicitacao.com.br/!licitacao/DOU-2bf572cfde518dc4cd03",
   "data_fonte": "out/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-01"
  },
  {
   "id": "piloto-4a0b4ba2",
@@ -1341,7 +1396,8 @@
   "dica": "Calçadas e bases de mobiliário.",
   "fonte": "https://alertalicitacao.com.br/!licitacao/PNCP-88185020000125-1-000244-2026",
   "data_fonte": "out/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-01"
  },
  {
   "id": "piloto-0a4eb477",
@@ -1353,7 +1409,7 @@
   "lon": -51.186,
   "endereco": "R. Monte Castelo, 235, N. Sra. das Graças",
   "categoria": "predio",
-  "fase": "projeto",
+  "fase": "em_obra",
   "fase_texto": "Fase final (entrega dez/2026)",
   "prioridade": "baixa",
   "responsavel": "Flex",
@@ -1365,7 +1421,8 @@
   "dica": "Obra acabando.",
   "fonte": "https://jornaltimoneiro.com.br/index.php/2026/10/13/flex-tres-empreendimentos-construcao-canoas/",
   "data_fonte": "13/10/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-10-13"
  },
  {
   "id": "piloto-a541a3ec",
@@ -1389,7 +1446,8 @@
   "dica": "Obras em fase final.",
   "fonte": "https://moveup.imb.br/colecao-prime-melnick/",
   "data_fonte": "nov/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-11-01"
  },
  {
   "id": "piloto-3f794143",
@@ -1401,7 +1459,7 @@
   "lon": -51.206,
   "endereco": "Não informado",
   "categoria": "residencial",
-  "fase": "projeto",
+  "fase": "em_obra",
   "fase_texto": "Fase final",
   "prioridade": "baixa",
   "responsavel": "MCMV",
@@ -1413,6 +1471,7 @@
   "dica": "Obra acabando.",
   "fonte": "https://www.encontraportoalegre.com.br/sobre/mais-420-moradias-do-minha-casa-minha-vida-em-porto-alegre-rs/",
   "data_fonte": "09/06/2026",
-  "origem": "Pesquisa manual (piloto)"
+  "origem": "Pesquisa manual (piloto)",
+  "data_iso": "2026-06-09"
  }
 ]
