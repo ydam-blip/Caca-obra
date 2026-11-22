@@ -100,6 +100,16 @@ dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
 .rod{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:8px;font-size:13px;color:var(--muted)}
 .rod select{width:auto;padding:5px 8px;font-size:13px}
 .nota{font-size:14px;min-height:38px;resize:vertical}
+.local{font-size:14px;display:grid;gap:2px;background:var(--bg);border-radius:8px;padding:8px 10px}
+.local .ref{color:var(--muted);font-size:13px}
+.prec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.prec.rua{color:var(--ok)} .prec.bairro{color:var(--media)} .prec.cidade{color:var(--alta)}
+.mini.waze{border-color:#33ccff;color:#0a7ea8}
+.vista{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.vista button{border:0;background:var(--surface);padding:5px 12px;font-weight:600;cursor:pointer}
+.vista button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+#mapa{height:70vh;min-height:360px;border-radius:var(--radius);border:1px solid var(--line);margin-bottom:90px;background:var(--surface-2)}
+#mapa .leaflet-popup-content{font-family:var(--body);font-size:14px;color:#1d2327}
 .vazio{grid-column:1/-1;text-align:center;padding:40px 16px;color:var(--muted)}
 .vazio b{display:block;font-family:var(--display);font-size:22px;color:var(--fg)}
 
@@ -155,8 +165,9 @@ dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
     </div>
   </div>
   <div id="msg"></div>
-  <div class="meta"><span id="contagem"></span><span id="atualizado"></span></div>
+  <div class="meta"><span id="contagem"></span><span class="row"><span id="atualizado"></span><span class="vista" id="vista" hidden><button data-v="lista" aria-pressed="true">Lista</button><button data-v="mapa" aria-pressed="false">Mapa</button></span></span></div>
   <div class="lista" id="lista"></div>
+  <div id="mapa" hidden></div>
 </main>
 
 <button class="fab" id="novaObra">＋ Obra que vi</button>
@@ -229,6 +240,37 @@ function filtrar(){
    .filter(o=>!q||norm([o.nome,o.municipio,o.endereco,o.construtora,o.responsavel,o.dica].join(" ")).includes(q))
    .filter(o=>!st.ocultar||(marcas[o.id]||{}).s!=="Descartada");
 }
+function rotas(o){
+  const exato=(o.precisao==="rua"||o.precisao==="bairro")&&o.lat!=null;
+  const txt=[o.endereco,o.municipio,o.uf].filter(Boolean).join(", ");
+  return{waze:exato?`https://waze.com/ul?ll=${o.lat},${o.lon}&navigate=yes`:`https://waze.com/ul?q=${encodeURIComponent(txt)}&navigate=yes`,
+    gmaps:exato?`https://www.google.com/maps/search/?api=1&query=${o.lat},${o.lon}`:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(txt)}`}}
+let VISTA="lista",MAPA=null,GRUPO=null,ULTIMA=[];
+const NO_CLAUDE=/claude/.test(location.hostname);
+function carregar(src,css){return new Promise((ok,erro)=>{const e=document.createElement(css?"link":"script");if(css){e.rel="stylesheet";e.href=src}else{e.src=src}e.onload=ok;e.onerror=erro;document.head.appendChild(e)})}
+async function abrirMapa(){
+  if(!window.L){const B="https://cdnjs.cloudflare.com/ajax/libs/";
+    await Promise.all([carregar(B+"leaflet/1.9.4/leaflet.min.css",1),carregar(B+"leaflet.markercluster/1.5.3/MarkerCluster.min.css",1),carregar(B+"leaflet.markercluster/1.5.3/MarkerCluster.Default.min.css",1)]);
+    await carregar(B+"leaflet/1.9.4/leaflet.min.js");await carregar(B+"leaflet.markercluster/1.5.3/leaflet.markercluster.min.js");}
+  if(!MAPA){MAPA=L.map("mapa");L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(MAPA);}
+  desenharMapa();setTimeout(()=>MAPA.invalidateSize(),50);
+}
+function desenharMapa(){
+  if(!MAPA)return; if(GRUPO)MAPA.removeLayer(GRUPO);
+  GRUPO=L.markerClusterGroup({maxClusterRadius:35,spiderfyOnMaxZoom:true,showCoverageOnHover:false});
+  const cor={alta:"#c2410c",media:"#a16207",baixa:"#4b6b84"};const pts=[];
+  ULTIMA.filter(o=>o.lat!=null).forEach(o=>{const ap=!(o.precisao==="rua"||o.precisao==="bairro");
+    const m=L.circleMarker([o.lat,o.lon],{radius:ap?7:9,color:cor[o.prioridade]||"#555",weight:ap?2:3,dashArray:ap?"3 3":null,fillColor:cor[o.prioridade]||"#555",fillOpacity:ap?0.15:0.85});
+    const r=rotas(o);
+    m.bindPopup(`<b>${esc(o.nome)}</b><br>${esc(o.endereco||o.municipio)}${o.referencia?`<br><small>${esc(o.referencia)}</small>`:""}<br><small>${ap?"Local aproximado (centro da cidade)":"Local no mapa"}</small><br><a href="${r.waze}" target="_blank" rel="noopener">Abrir no Waze</a> · <a href="${r.gmaps}" target="_blank" rel="noopener">Maps</a>`);
+    GRUPO.addLayer(m);pts.push([o.lat,o.lon])});
+  MAPA.addLayer(GRUPO);
+  if(pts.length)MAPA.fitBounds(pts,{padding:[30,30],maxZoom:14});else MAPA.setView([st.lat,st.lon],10);
+}
+$("#vista").onclick=async e=>{const b=e.target.closest("button");if(!b)return;VISTA=b.dataset.v;
+  [...$("#vista").children].forEach(x=>x.setAttribute("aria-pressed",x===b));
+  $("#lista").hidden=VISTA!=="lista";$("#mapa").hidden=VISTA!=="mapa";
+  if(VISTA==="mapa"){try{await abrirMapa()}catch(err){aviso("Não consegui abrir o mapa. Verifique a internet.");}}};
 function novaSemana(o){if(!o.primeira_vez)return false;return (Date.now()-new Date(o.primeira_vez).getTime())<8*864e5}
 
 function render(){
@@ -238,7 +280,7 @@ function render(){
   $("#resumo").innerHTML=[["alta","Alta"],["media","Média"],["baixa","Baixa"]].map(([k,v])=>`<button class="tile ${k} ${st.pri===k?"on":""}" data-p="${k}"><b>${cont[k]||0}</b><small>${v}</small></button>`).join("")+`<button class="tile ${st.pri==="novas"?"on":""}" data-p="novas"><b>${novas}</b><small>Novas</small></button>`;
   let lista=base.filter(o=>!st.pri||(st.pri==="novas"?novaSemana(o):o.prioridade===st.pri));
   const ord={pri:(a,b)=>(PRI_ORD[a.prioridade]-PRI_ORD[b.prioridade])||((a._d??999)-(b._d??999)),dist:(a,b)=>(a._d??999)-(b._d??999),rec:(a,b)=>String(b.data_iso||"").localeCompare(String(a.data_iso||""))};
-  lista.sort(ord[st.ordem]);
+  lista.sort(ord[st.ordem]);ULTIMA=lista;if(VISTA==="mapa")desenharMapa();
   $("#contagem").textContent=`${lista.length} obra${lista.length===1?"":"s"} em ${st.cidade}/${st.uf} e até ${st.raio} km`;
   $("#lista").innerHTML=lista.length?lista.map(ficha).join(""):`<div class="vazio"><b>Nenhuma obra aqui ainda</b>Aumente o raio, limpe os filtros ou toque em “Buscar licitações agora”. Para pesquisar obras particulares numa região nova, peça no chat do projeto.</div>`;
 }
@@ -248,21 +290,25 @@ function ficha(o){
   const fases=[1,2,3,4,5].map(i=>`<span class="${i<=passo?"on":""}"></span>`).join("");
   const tels=telefones(o.contato);
   const cont=o.contato&&o.contato!=="—"?`<div class="contato"><span class="num">${esc(o.contato)}</span>${tels.map(t=>`<a class="mini" href="tel:${t.tel}">Ligar</a>${t.wpp?`<a class="mini wpp" href="https://wa.me/${t.wpp}" target="_blank" rel="noopener">WhatsApp</a>`:""}`).join("")}<button class="mini" data-copia="${esc(o.contato)}">Copiar</button></div>`:"";
-  const linhas=[["Dono",o.responsavel],["Construtora",o.construtora],["Valor",o.valor],["Previsão",o.previsao],["Endereço",o.endereco],["Endereço da construtora",o.endereco_construtora]].filter(([,v])=>v&&v!=="—"&&v!=="Não informada");
-  const mapa=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([o.endereco,o.municipio,o.uf].filter(Boolean).join(", "))}`;
+  const linhas=[["Dono",o.responsavel],["Construtora",o.construtora],["Valor",o.valor],["Previsão",o.previsao],["Endereço da construtora",o.endereco_construtora]].filter(([,v])=>v&&v!=="—"&&v!=="Não informada");
+  const {waze,gmaps}=rotas(o);
+  const prec=o.precisao||(o.endereco?"":"cidade");
+  const precTxt={rua:"Endereço localizado",bairro:"Bairro localizado",cidade:"Local aproximado (só a cidade) – confirme"}[prec]||"";
+  const local=`<div class="local">${precTxt?`<span class="prec ${prec}">${precTxt}</span>`:""}<span>${esc([o.endereco,o.bairro&&!norm(o.endereco).includes(norm(o.bairro))?"Bairro "+o.bairro:""].filter(Boolean).join(" – ")||o.municipio)}</span>${o.referencia?`<span class="ref">Referência: ${esc(o.referencia)}</span>`:""}</div>`;
   return `<article class="ficha ${o.prioridade} ${m.s==="Descartada"?"desc":""}">
    <div class="faixa"></div><div class="corpo">
     <div class="cab"><h3>${esc(o.nome)}</h3><span class="pri ${o.prioridade}">${({alta:"Alta",media:"Média",baixa:"Baixa"})[o.prioridade]||""}</span></div>
-    <div class="lugar">${esc(o.municipio)}/${esc(o.uf)}${o._d!=null?` · ${Math.round(o._d)} km`:""}</div>
+    <div class="lugar">${esc(o.municipio)}/${esc(o.uf)}${o._d!=null?` · ${o.precisao==="cidade"?"~":""}${Math.round(o._d)} km`:""}</div>
     <div class="tags"><span class="tag">${CAT[o.categoria]||o.categoria}</span>${o.porte?`<span class="tag">${PORTE[o.porte]||o.porte}</span>`:""}${novaSemana(o)?`<span class="tag nova">Nova</span>`:""}${o.minha?`<span class="tag">Anotada por mim</span>`:""}</div>
     <div class="fases" aria-hidden="true">${fases}</div>
     <div class="fasetxt"><b>${esc((FASES.find(f=>f[0]===o.fase)||[,""])[1])}</b><span>${esc(o.fase_texto||"")}</span></div>
+    ${local}
     ${linhas.length?`<dl>${linhas.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`:""}
     ${cont}
     ${o.dica?`<div class="dica">${esc(o.dica)}</div>`:""}
     <textarea class="nota" data-nota="${esc(o.id)}" placeholder="Minha anotação…" rows="1">${esc(m.n||"")}</textarea>
     <div class="rod"><select data-status="${esc(o.id)}" aria-label="Situação">${STATUS.map(s=>`<option ${s===(m.s||"Nova")?"selected":""}>${s}</option>`).join("")}</select>
-     <span class="row"><a class="mini" href="${mapa}" target="_blank" rel="noopener">Mapa</a>${o.fonte&&/^https?:/.test(o.fonte)?`<a class="mini" href="${esc(o.fonte)}" target="_blank" rel="noopener">Fonte</a>`:""}${o.minha?`<button class="mini" data-apaga="${esc(o.id)}">Apagar</button>`:""}</span></div>
+     <span class="row"><a class="mini waze" href="${waze}" target="_blank" rel="noopener">Waze</a><a class="mini" href="${gmaps}" target="_blank" rel="noopener">Maps</a>${o.fonte&&/^https?:/.test(o.fonte)?`<a class="mini" href="${esc(o.fonte)}" target="_blank" rel="noopener">Fonte</a>`:""}${o.minha?`<button class="mini" data-apaga="${esc(o.id)}">Apagar</button>`:""}</span></div>
     <div style="font-size:12px;color:var(--muted)">${esc(o.origem||"")}${o.data_fonte?` · ${esc(/^\d{4}-\d{2}-\d{2}/.test(o.data_fonte)?o.data_fonte.slice(0,10).split("-").reverse().join("/"):o.data_fonte)}`:""}</div>
    </div></article>`;
 }
@@ -344,7 +390,11 @@ async function iniciar(){
     MUN=m;OBRAS=d.obras||[];META=d;
   }catch(e){aviso("Não consegui carregar a lista de obras. Verifique a internet e abra de novo.");}
   $("#listaCidades").innerHTML=MUN.map(m=>`<option value="${esc(m[1])} - ${m[2]}">`).join("");
-  if(META.atualizado_em){const[a,mm,dd]=META.atualizado_em.slice(0,10).split("-");$("#atualizado").textContent=`Atualizado em ${dd}/${mm}/${a}`}
+  if(META.atualizado_em){const[a,mm,dd]=META.atualizado_em.slice(0,10).split("-");$("#atualizado").textContent=`Atualizado em ${dd}/${mm}/${a}`;
+    const dias=(Date.now()-new Date(META.atualizado_em.slice(0,10)).getTime())/864e5;const rel=META.relatorio||{};
+    if(rel.status==="alerta")aviso("Atenção: a última busca automática teve problema. "+esc((rel.alertas||[]).join(" "))+" A lista pode estar incompleta.");
+    else if(dias>9)aviso(`A lista não é atualizada há ${Math.floor(dias)} dias. A busca automática pode ter falhado.`);}
+  $("#vista").hidden=NO_CLAUDE;
   chips($("#fCat"),Object.entries(CAT),st.cat,render);
   chips($("#fFase"),FASES,st.fase,render);
   chips($("#fPorte"),Object.entries(PORTE),st.porte,render);

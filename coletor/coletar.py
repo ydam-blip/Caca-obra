@@ -75,8 +75,12 @@ def norm(s):
 
 
 # ---------------------------------------------------------------- HTTP
+ESTATISTICA = {"consultas": 0, "falhas": 0}
+
+
 def http_json(url, tentativas=3):
     """Baixa JSON. Devolve None se não houver conteúdo ou se der erro."""
+    ESTATISTICA["consultas"] += 1
     for i in range(tentativas):
         try:
             req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "caca-obra-coletor/1.0"})
@@ -95,6 +99,7 @@ def http_json(url, tentativas=3):
         except Exception as e:  # rede, timeout, JSON inválido
             print(f"   aviso: falha em {url[:120]}… ({e})", file=sys.stderr)
             time.sleep(3 * (i + 1))
+    ESTATISTICA["falhas"] += 1
     return None
 
 
@@ -291,7 +296,7 @@ def gravar_json(nome, obj, compacto=False):
     os.replace(tmp, caminho)
 
 
-def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cnpj=dados_cnpj):
+def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cnpj=dados_cnpj, localizar_obras=True):
     hoje = hoje or date.today()
     municipios = carregar_municipios()
     alvo = {}
@@ -358,9 +363,39 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
 
     manuais = ler_json("obras_piloto.json", []) + ler_json("obras_manuais.json", [])
     tudo = manuais + coletadas
+
+    # endereço exato + ponto de referência (OpenStreetMap)
+    precisao = {}
+    if localizar_obras:
+        from localizar import localizar
+        por_nome = {(norm(m["nome"]), m["uf"]): m for m in municipios}
+        precisao = localizar(tudo, por_nome, DADOS)
+        print(f"Localização: {precisao}")
+    gravar_json("obras_coletadas.json", coletadas)
+
+    # conferência da busca: se o PNCP não respondeu, avisa (o GitHub manda e-mail quando falha)
+    alertas = []
+    if not brutos:
+        alertas.append("O PNCP não devolveu nenhuma licitação nesta busca.")
+    if ESTATISTICA["consultas"] and ESTATISTICA["falhas"] / ESTATISTICA["consultas"] > 0.3:
+        alertas.append(f"{ESTATISTICA['falhas']} de {ESTATISTICA['consultas']} consultas ao PNCP falharam.")
+    if brutos and not novos:
+        alertas.append("Nenhuma licitação de obra encontrada na região (pode ser filtro ou falha).")
+    relatorio = dict(
+        data=datetime.now().strftime("%Y-%m-%d %H:%M"), status="alerta" if alertas else "ok", alertas=alertas,
+        licitacoes_lidas=len(brutos), obras_pncp=len(coletadas),
+        novas_semana=sum(1 for o in coletadas if o.get("primeira_vez") == hoje.isoformat()),
+        com_vencedor=sum(1 for o in coletadas if o.get("fase") == "contratada"),
+        pesquisa_manual=len(manuais), localizacao=precisao,
+        consultas=ESTATISTICA["consultas"], falhas=ESTATISTICA["falhas"])
+    gravar_json("relatorio.json", relatorio)
+    if alertas and not brutos:
+        # não apaga a lista boa da semana passada: falha aqui e o GitHub avisa por e-mail
+        print("ERRO: " + " ".join(alertas), file=sys.stderr)
+        raise SystemExit(2)
     gravar_json("obras.json", dict(
         atualizado_em=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        regioes=regioes, total=len(tudo), obras=tudo), compacto=True)
+        regioes=regioes, total=len(tudo), relatorio=relatorio, obras=tudo), compacto=True)
     print(f"OK: {len(coletadas)} obras do PNCP + {len(manuais)} da pesquisa manual = {len(tudo)}")
     return tudo
 
