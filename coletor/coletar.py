@@ -38,23 +38,32 @@ DIAS_MANTER = 180          # licitações encerradas há mais tempo saem da list
 TAM_PAGINA = 50
 MAX_PAGINAS = 60           # trava de segurança por consulta
 
-# Palavras que indicam obra / uso de concreto no objeto da licitação.
-PALAVRAS_OBRA = [
-    "obra", "construcao", "construir", "edificacao", "pavimentacao", "pavimento", "recapeamento",
-    "asfalt", "calcamento", "calcada", "passeio publico", "meio-fio", "meio fio", "drenagem", "pluvial",
-    "galeria", "bueiro", "ponte", "viaduto", "passarela", "contencao", "muro", "reforma", "ampliacao",
-    "concreto", "usinado", "pre-moldado", "pre moldado", "laje", "fundacao", "estaca", "terraplenagem",
-    "saneamento", "esgot", "estacao de tratamento", "reservatorio", "escola", "creche", "ubs",
-    "unidade basica", "quadra", "ginasio", "pista", "ciclovia", "praca", "habitacional", "moradias",
-    "unidades habitacionais", "engenharia", "infraestrutura", "urbanizacao", "dique", "barragem",
+# Expressões (regex, já sem acento e em minúsculas) que indicam obra / uso de concreto.
+PADROES_OBRA = [
+    r"\bobras?\b", r"\bconstrucao\b", r"\bconstruir\b", r"\bedificac", r"\bpavimenta", r"\brecapeamento",
+    r"\bcapeamento", r"\basfalt", r"\bcalcamento", r"\bcalcadas?\b", r"\bmeio[- ]fios?\b", r"\bdrenagem",
+    r"\bgalerias?\b", r"\bbueiros?\b", r"\bpontes?\b", r"\bviadutos?\b", r"\bpassarelas?\b", r"\bcontencao",
+    r"\bmuros?\b", r"\breforma\b", r"\bampliacao", r"\bconcreto\b", r"\businado\b", r"\bpre[- ]?moldad",
+    r"\bartefatos de (concreto|cimento)", r"\blajes?\b", r"\bfundacoes?\b", r"\bestacas?\b", r"\bterraplenagem",
+    r"\brede de esgoto", r"\bestacao de tratamento", r"\breservatorio", r"\bciclovia", r"\burbanizacao",
+    r"\brevitalizacao", r"\bhabitacional", r"\bunidades habitacionais", r"\bdiques?\b", r"\bbarragem",
+    r"\bempreitada\b", r"\bquadra (poliesportiva|coberta|esportiva)", r"\bginasio", r"\bescola\b.*\b(constru|amplia|reforma)",
 ]
-# Palavras que tiram o item da lista (compras que não são obra).
-PALAVRAS_EXCLUIR = [
-    "aquisicao de pneus", "medicamento", "genero alimenticio", "generos alimenticios", "merenda",
-    "locacao de veiculo", "combustivel", "material de expediente", "software", "licenca de uso",
-    "transporte escolar", "uniforme", "consultoria juridica", "plano de saude", "limpeza de fossa",
-    "servicos de limpeza", "coleta de lixo", "vigilancia", "seguro ", "passagens aereas",
+# Objetos que não são obra mesmo citando uma palavra acima.
+PADROES_EXCLUIR = [
+    r"dedicacao exclusiva de mao", r"\blimpeza\b", r"\bvigia", r"\bvigilancia", r"\bzeladoria", r"\btelefon",
+    r"\bautomotiv", r"\bgrafic", r"\boutsourcing", r"\bepi\b", r"tecnologia da informacao", r"\bexames?\b",
+    r"\balimentacao\b", r"\bstreaming", r"\bmudanca\b", r"\bcontab", r"\bbrindes", r"\bpedagio", r"\blousas?\b",
+    r"\bbebedouro", r"\bdivisoria", r"\bconcessao", r"\benfermagem", r"\bhigieniza", r"\bpneus?\b",
+    r"\bmedicament", r"\bgeneros? aliment", r"\bmerenda", r"\blocacao de (veiculo|maquina|equipamento)",
+    r"\bcombustive", r"\bsoftware", r"\btransporte escolar", r"\buniformes?\b", r"\bseguros?\b",
+    r"\bpassagens aereas", r"\bfossas?\b", r"\bcoleta de (lixo|residuo)", r"\bjardinagem", r"\bpoda\b",
+    r"\bmanutencao (preventiva|corretiva) (de|em|dos?) (equipamento|elevador|ar[- ]condicionado|gerador|veiculo)",
+    r"\bveiculacao", r"\bpublicidade", r"\bcursos?\b", r"\btreinamento", r"\bacervo", r"\bbibliograf",
+    r"\blivros?\b", r"\bpelvic", r"\bmedicinal", r"\bpecas\b", r"\bresiduos", r"\bextintor",
 ]
+_RE_OBRA = re.compile("|".join(PADROES_OBRA))
+_RE_EXCLUIR = re.compile("|".join(PADROES_EXCLUIR))
 PALAVRAS_INFRA = ["pavimenta", "recape", "asfalt", "calcamento", "drenagem", "pluvial", "galeria", "bueiro",
                   "ponte", "viaduto", "saneamento", "esgot", "estrada", "rodovia", "terraplen", "dique",
                   "barragem", "contencao", "meio-fio", "meio fio", "ciclovia", "infraestrutura", "urbanizacao"]
@@ -153,9 +162,11 @@ def buscar_pncp(ufs, hoje):
 
 def e_obra(objeto):
     o = norm(objeto)
-    if any(p in o for p in PALAVRAS_EXCLUIR):
+    o = re.sub(r"mao[- ]de[- ]obra", " ", o)
+    o = re.sub(r"secretaria( municipal)?( de [a-z]+)*? de obras", " ", o)
+    if len(o.strip()) < 15 or _RE_EXCLUIR.search(o):
         return False
-    return any(p in o for p in PALAVRAS_OBRA)
+    return bool(_RE_OBRA.search(o))
 
 
 def buscar_vencedor(item):
@@ -187,7 +198,7 @@ def dados_cnpj(cnpj):
         tels = []
         for k in ("ddd_telefone_1", "ddd_telefone_2"):
             t = re.sub(r"\D", "", str(d.get(k) or ""))
-            if len(t) >= 10:
+            if len(t) >= 10 and not t.startswith("00") and len(set(t)) > 2:
                 tels.append(f"({t[:2]}) {t[2:-4]}-{t[-4:]}")
         end = ", ".join(x for x in [
             " ".join(x for x in [d.get("descricao_tipo_de_logradouro") or "", d.get("logradouro") or ""] if x).strip(),
@@ -320,7 +331,7 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
                 ob["fase"] = "contratada"
                 ob["fase_texto"] = "Vencedor definido – obra deve começar em breve"
                 ob["dica"] = "Ligue para a construtora vencedora e ofereça concreto antes do início da obra."
-                if any(p in norm(ob["nome"]) for p in PALAVRAS_CONCRETO):
+                if re.search(r"aquisi|fornecimento|registro de preco", norm(ob["nome"])) and any(p in norm(ob["nome"]) for p in PALAVRAS_CONCRETO):
                     ob["construtora"] = "Fornecedor vencedor (concorrente): " + ob["construtora"]
                     ob["fase_texto"] = "Compra de concreto já contratada"
                     ob["dica"] = "Outro fornecedor venceu. Anote o preço e o prazo do contrato e prepare-se para a próxima compra deste órgão."
@@ -330,7 +341,7 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
     # mantém coletadas antigas que ainda valem (fora do raio desta vez ou não retornadas)
     limite = (hoje - timedelta(days=DIAS_MANTER)).isoformat()
     for oid, o in anteriores.items():
-        if oid not in novos and (o.get("encerramento") or o.get("data_fonte") or "9999") >= limite:
+        if oid not in novos and e_obra(o.get("nome")) and (o.get("encerramento") or o.get("data_fonte") or "9999") >= limite:
             novos[oid] = o
     coletadas = sorted(novos.values(), key=lambda o: (o.get("primeira_vez") or "", o.get("data_fonte") or ""), reverse=True)
     gravar_json("obras_coletadas.json", coletadas)
