@@ -111,6 +111,8 @@ dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
 #mapa{height:70vh;min-height:360px;border-radius:var(--radius);border:1px solid var(--line);margin-bottom:90px;background:var(--surface-2)}
 #mapa .leaflet-popup-content{font-family:var(--body);font-size:14px;color:#1d2327}
 .mais{grid-column:1/-1;justify-self:center}
+#pertoBtn[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+#pertoRaio{margin-bottom:10px}
 .retornos{display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-weight:600;cursor:pointer;width:100%;text-align:left}
 .retornos.on{outline:2px solid var(--accent)}
 .tag.ret{background:var(--accent-soft)} .tag.atr{background:var(--alta);color:#fff}
@@ -169,10 +171,12 @@ dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
       </select>
     </div>
     <div class="row">
+      <button class="btn" id="pertoBtn" aria-pressed="false">📍 Perto de mim</button>
       <button class="btn" id="buscarAgora">🔎 Buscar licitações agora</button>
       <label class="row" style="font-size:14px"><input type="checkbox" id="ocultar" checked> Esconder descartadas</label>
     </div>
   </div>
+  <div class="chips" id="pertoRaio" role="group" aria-label="Distância de você" hidden></div>
   <div id="msg"></div>
   <button class="retornos" id="retornos" hidden></button>
   <div class="meta"><span id="contagem"></span><span class="row"><span id="atualizado"></span><span class="vista" id="vista" hidden><button data-v="lista" aria-pressed="true">Lista</button><button data-v="mapa" aria-pressed="false">Mapa</button></span></span></div>
@@ -258,8 +262,9 @@ function todas(){return [...OBRAS,...AO_VIVO.filter(a=>!OBRAS.some(o=>o.id===a.i
 
 function filtrar(){
   const q=norm(st.q);
-  return todas().map(o=>({...o,_d:(o.lat!=null)?dist(st.lat,st.lon,o.lat,o.lon):null}))
-   .filter(o=>o._d==null?norm(o.municipio).includes(norm(st.cidade)):o._d<=st.raio)
+  const c=PERTO||{lat:st.lat,lon:st.lon,raio:st.raio};
+  return todas().map(o=>({...o,_d:(o.lat!=null)?dist(c.lat,c.lon,o.lat,o.lon):null}))
+   .filter(o=>o._d==null?(!PERTO&&norm(o.municipio).includes(norm(st.cidade))):o._d<=c.raio)
    .filter(o=>!st.cat.size||st.cat.has(o.categoria))
    .filter(o=>!st.fase.size||st.fase.has(o.fase))
    .filter(o=>!st.porte.size||st.porte.has(o.porte))
@@ -338,8 +343,8 @@ function render(manterPagina){
   rb.innerHTML=st.pri==="retorno"?`<span>Mostrando só os retornos de hoje</span><span>Ver todas</span>`:`<span>📞 ${devidos.length} retorno${devidos.length===1?"":"s"} para hoje</span><span>Ver</span>`;
   let lista=st.pri==="retorno"?devidos:base.filter(o=>!st.pri||(st.pri==="novas"?novaSemana(o):o.prioridade===st.pri));
   const ord={pri:(a,b)=>(PRI_ORD[a.prioridade]-PRI_ORD[b.prioridade])||((a._d??999)-(b._d??999)),dist:(a,b)=>(a._d??999)-(b._d??999),rec:(a,b)=>String(b.data_iso||"").localeCompare(String(a.data_iso||""))};
-  lista.sort(ord[st.ordem]);ULTIMA=lista;if(VISTA==="mapa")desenharMapa();
-  $("#contagem").textContent=`${lista.length} obra${lista.length===1?"":"s"} em ${st.cidade}/${st.uf} e até ${st.raio} km`;
+  lista.sort(PERTO?ord.dist:ord[st.ordem]);ULTIMA=lista;if(VISTA==="mapa")desenharMapa();
+  $("#contagem").textContent=PERTO?`${lista.length} obra${lista.length===1?"":"s"} a até ${PERTO.raio} km de você, da mais perto para a mais longe`:`${lista.length} obra${lista.length===1?"":"s"} em ${st.cidade}/${st.uf} e até ${st.raio} km`;
   $("#lista").innerHTML=lista.length?lista.slice(0,MOSTRAR).map(ficha).join("")+(lista.length>MOSTRAR?`<button class="btn lin mais" id="mais">Mostrar mais ${Math.min(PASSO,lista.length-MOSTRAR)} de ${lista.length-MOSTRAR} restantes</button>`:""):`<div class="vazio"><b>Nenhuma obra aqui ainda</b>Aumente o raio, limpe os filtros ou toque em “Buscar licitações agora”. Para pesquisar obras particulares numa região nova, peça no chat do projeto.</div>`;
 }
 
@@ -400,6 +405,17 @@ $("#gps").onclick=()=>{if(!navigator.geolocation){aviso("Este aparelho não info
    Object.assign(st,{cidade:best[1],uf:best[2],lat:a,lon:b,raio:+$("#raio").value});salvar();txtRegiao();$("#painel").hidden=true;render()},
    ()=>aviso("Não consegui pegar a localização aqui. Digite a cidade."),{timeout:10000})};
 
+/* perto de mim */
+let PERTO=null;const RAIOS=[5,10,25,50];let raioPerto=ls.get("raioPerto",10);
+function chipsPerto(){$("#pertoRaio").innerHTML=RAIOS.map(r=>`<button class="chip" data-r="${r}" aria-pressed="${r===raioPerto}">${r} km</button>`).join("")}
+$("#pertoRaio").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;raioPerto=+b.dataset.r;ls.set("raioPerto",raioPerto);chipsPerto();if(PERTO){PERTO.raio=raioPerto;render()}};
+$("#pertoBtn").onclick=()=>{
+  if(PERTO){PERTO=null;$("#pertoBtn").setAttribute("aria-pressed","false");$("#pertoRaio").hidden=true;render();return}
+  if(!navigator.geolocation){aviso("Este aparelho não informou a localização.");return}
+  const b=$("#pertoBtn");b.textContent="📍 Procurando você…";
+  navigator.geolocation.getCurrentPosition(p=>{b.textContent="📍 Perto de mim";PERTO={lat:p.coords.latitude,lon:p.coords.longitude,raio:raioPerto};
+    b.setAttribute("aria-pressed","true");chipsPerto();$("#pertoRaio").hidden=false;aviso("");render()},
+   ()=>{b.textContent="📍 Perto de mim";aviso("Não consegui pegar sua localização. Libere a localização para o app no celular e tente de novo.")},{enableHighAccuracy:true,timeout:15000,maximumAge:60000})};
 function aviso(t){$("#msg").innerHTML=t?`<div class="aviso">${t}</div>`:""}
 
 /* busca ao vivo no PNCP (funciona quando o app está no endereço próprio) */
