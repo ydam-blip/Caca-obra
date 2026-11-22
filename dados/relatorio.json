@@ -1,0 +1,17 @@
+{
+ "data": "2026-11-22 16:17",
+ "status": "ok",
+ "alertas": [],
+ "licitacoes_lidas": 6783,
+ "obras_pncp": 116,
+ "novas_semana": 116,
+ "com_vencedor": 8,
+ "pesquisa_manual": 59,
+ "localizacao": {
+  "rua": 10,
+  "bairro": 20,
+  "cidade": 145
+ },
+ "consultas": 198,
+ "falhas": 0
+}
