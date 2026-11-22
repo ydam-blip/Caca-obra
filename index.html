@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d2327">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Caça Obra</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: barra fixa com a região no topo, filtros em fita rolável, lista de fichas de obra em uma coluna (duas no desktop). */
+:root{
+  --bg:#eef0f1; --surface:#ffffff; --surface-2:#e3e6e8; --line:#cfd4d8;
+  --fg:#1d2327; --muted:#5d666d; --accent:#e2a400; --accent-ink:#1d1a10; --accent-soft:#fbefc8;
+  --alta:#c2410c; --media:#a16207; --baixa:#4b6b84; --ok:#2f7d4f;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#15191c; --surface:#1e2428; --surface-2:#283037; --line:#36404a;
+  --fg:#e8ecee; --muted:#9aa5ad; --accent:#f0b51e; --accent-ink:#1d1a10; --accent-soft:#3a3218;
+  --alta:#f97343; --media:#e0a93a; --baixa:#86a9c4; --ok:#5fbf86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15191c; --surface:#1e2428; --surface-2:#283037; --line:#36404a;
+  --fg:#e8ecee; --muted:#9aa5ad; --accent:#f0b51e; --accent-ink:#1d1a10; --accent-soft:#3a3218;
+  --alta:#f97343; --media:#e0a93a; --baixa:#86a9c4; --ok:#5fbf86; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--fg)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1100px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* topo */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--fg);color:var(--bg)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.02em;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin:0}
+.brand i{display:inline-block;width:14px;height:22px;background:repeating-linear-gradient(-45deg,var(--accent) 0 5px,var(--fg) 5px 10px);border-radius:2px}
+.regiao{margin-left:auto;display:flex;align-items:center;gap:8px;background:transparent;border:1.5px solid color-mix(in srgb,var(--bg) 40%,transparent);color:var(--bg);border-radius:999px;padding:6px 14px;cursor:pointer;font-weight:600;min-width:0}
+.regiao span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.regiao:hover{border-color:var(--accent)}
+
+/* painel região */
+.painel{background:var(--surface);border-bottom:1px solid var(--line)}
+.painel .wrap{padding-block:14px;display:grid;gap:12px;grid-template-columns:minmax(0,2fr) minmax(0,1.4fr) auto;align-items:end}
+@media (max-width:720px){.painel .wrap{grid-template-columns:1fr}}
+label.f{display:grid;gap:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+input[type=text],input[type=search],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;text-transform:none;letter-spacing:0;font-weight:400;font-size:15px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.btn{border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;background:var(--surface-2);color:var(--fg);white-space:nowrap}
+.btn.prim{background:var(--accent);color:var(--accent-ink)}
+.btn.lin{background:transparent;border:1px solid var(--line)}
+.btn:disabled{opacity:.6;cursor:progress}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* resumo */
+.resumo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding-block:14px}
+.tile{background:var(--surface);border-radius:var(--radius);padding:10px 12px;border:1px solid var(--line);cursor:pointer;text-align:left}
+.tile b{display:block;font-family:var(--display);font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.tile small{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.tile.on{outline:2px solid var(--accent)}
+.tile.alta b{color:var(--alta)} .tile.media b{color:var(--media)} .tile.baixa b{color:var(--baixa)}
+@media (max-width:420px){.tile b{font-size:24px}.tile{padding:8px}}
+
+/* filtros */
+.filtros{display:grid;gap:10px;padding-bottom:12px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.busca{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.meta{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding-bottom:10px}
+.aviso{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:14px;margin-bottom:12px}
+
+/* lista */
+.lista{display:grid;gap:12px;grid-template-columns:1fr;padding-bottom:90px}
+@media (min-width:860px){.lista{grid-template-columns:1fr 1fr}}
+.ficha{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:grid;grid-template-columns:6px minmax(0,1fr);min-width:0}
+.ficha .faixa{background:var(--baixa)}
+.ficha.alta .faixa{background:var(--alta)} .ficha.media .faixa{background:var(--media)}
+.ficha.desc{opacity:.55}
+.corpo{padding:12px 14px;display:grid;gap:8px;min-width:0}
+.cab{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.cab h3{margin:0;font-family:var(--display);font-weight:600;font-size:20px;line-height:1.15;text-wrap:balance;overflow-wrap:anywhere}
+.pri{flex:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:4px;border:1.5px solid currentColor}
+.pri.alta{color:var(--alta)} .pri.media{color:var(--media)} .pri.baixa{color:var(--baixa)}
+.lugar{font-size:14px;color:var(--muted)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;background:var(--surface-2);border-radius:4px;padding:2px 8px;font-weight:600}
+.tag.nova{background:var(--accent);color:var(--accent-ink)}
+.fases{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.fases span{height:5px;border-radius:2px;background:var(--surface-2)}
+.fases span.on{background:var(--fg)}
+.fasetxt{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.fasetxt b{color:var(--fg);font-weight:600}
+dl{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:3px 10px;font-size:14px}
+dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
+.dica{font-size:14px;border-left:3px solid var(--accent);padding:2px 0 2px 10px}
+.contato{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.contato .num{user-select:all;font-variant-numeric:tabular-nums;font-weight:600}
+.mini{font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg);text-decoration:none;cursor:pointer;font-weight:600}
+.mini.wpp{border-color:var(--ok);color:var(--ok)}
+.rod{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:8px;font-size:13px;color:var(--muted)}
+.rod select{width:auto;padding:5px 8px;font-size:13px}
+.nota{font-size:14px;min-height:38px;resize:vertical}
+.vazio{grid-column:1/-1;text-align:center;padding:40px 16px;color:var(--muted)}
+.vazio b{display:block;font-family:var(--display);font-size:22px;color:var(--fg)}
+
+/* botão flutuante e formulário */
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;padding:14px 18px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;z-index:6}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.modal form{background:var(--surface);width:100%;max-width:560px;border-radius:14px 14px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:10px;max-height:90vh;overflow:auto}
+.modal h2{margin:0;font-family:var(--display);font-size:24px}
+.duas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (prefers-reduced-motion:no-preference){.ficha{transition:opacity .2s}}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1 class="brand"><i aria-hidden="true"></i>Caça Obra</h1>
+    <button class="regiao" id="btnRegiao" aria-expanded="false"><span id="txtRegiao">Porto Alegre/RS · 60 km</span> ▾</button>
+  </div>
+</header>
+
+<section class="painel" id="painel" hidden>
+  <div class="wrap">
+    <label class="f">Cidade
+      <input type="text" id="cidade" list="listaCidades" placeholder="Digite a cidade, ex.: Passo Fundo - RS" autocomplete="off">
+      <datalist id="listaCidades"></datalist>
+    </label>
+    <label class="f">Raio: <span id="txtRaio">60 km</span>
+      <input type="range" id="raio" min="10" max="300" step="10" value="60">
+    </label>
+    <div class="row">
+      <button class="btn prim" id="aplicar">Ver obras</button>
+      <button class="btn lin" id="gps">📍 Onde estou</button>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="resumo" id="resumo"></div>
+  <div class="filtros">
+    <div class="chips" id="fCat" role="group" aria-label="Tipo de obra"></div>
+    <div class="chips" id="fFase" role="group" aria-label="Fase"></div>
+    <div class="chips" id="fPorte" role="group" aria-label="Porte"></div>
+    <div class="busca">
+      <input type="search" id="q" placeholder="Buscar por nome, construtora, bairro…">
+      <select id="ordem" aria-label="Ordenar">
+        <option value="pri">Prioridade</option>
+        <option value="dist">Mais perto</option>
+        <option value="rec">Mais recentes</option>
+      </select>
+    </div>
+    <div class="row">
+      <button class="btn" id="buscarAgora">🔎 Buscar licitações agora</button>
+      <label class="row" style="font-size:14px"><input type="checkbox" id="ocultar" checked> Esconder descartadas</label>
+    </div>
+  </div>
+  <div id="msg"></div>
+  <div class="meta"><span id="contagem"></span><span id="atualizado"></span></div>
+  <div class="lista" id="lista"></div>
+</main>
+
+<button class="fab" id="novaObra">＋ Obra que vi</button>
+
+<div class="modal" id="modal" hidden>
+  <form id="form">
+    <h2>Anotar obra que vi</h2>
+    <label class="f">Nome / o que é<input type="text" id="mNome" required placeholder="Ex.: Prédio 8 andares Rua Tal"></label>
+    <div class="duas">
+      <label class="f">Cidade<input type="text" id="mCidade" list="listaCidades" required></label>
+      <label class="f">Tipo<select id="mCat"></select></label>
+    </div>
+    <label class="f">Endereço<input type="text" id="mEnd"></label>
+    <div class="duas">
+      <label class="f">Construtora<input type="text" id="mConst"></label>
+      <label class="f">Telefone<input type="text" id="mTel" inputmode="tel"></label>
+    </div>
+    <div class="duas">
+      <label class="f">Fase<select id="mFase"></select></label>
+      <label class="f">Prioridade<select id="mPri"><option value="alta">Alta</option><option value="media" selected>Média</option><option value="baixa">Baixa</option></select></label>
+    </div>
+    <label class="f">Observação<textarea id="mObs" rows="2"></textarea></label>
+    <p style="margin:0;font-size:13px;color:var(--muted)">Fica salvo só neste celular.</p>
+    <div class="row"><button class="btn prim" type="submit">Salvar</button><button class="btn lin" type="button" id="mCancelar">Cancelar</button></div>
+  </form>
+</div>
+
+<script>
+(()=>{
+const CAT={obra_publica:"Obra pública",infraestrutura:"Infraestrutura",predio:"Prédio / incorporação",industrial:"Industrial / galpão",residencial:"Residencial pequeno"};
+const FASES=[["projeto","Projeto"],["licitacao","Licitação"],["contratada","Contratada"],["lancamento","Lançamento"],["em_obra","Em obra"],["concluida","Concluída"]];
+const FASE_PASSO={projeto:1,licitacao:2,contratada:3,lancamento:3,em_obra:4,concluida:5};
+const PORTE={grande:"Grande",medio:"Médio",pequeno:"Pequeno"};
+const PRI_ORD={alta:0,media:1,baixa:2};
+const STATUS=["Nova","Liguei","Visitei","Orçamento enviado","Fechado ✔","Descartada"];
+const $=s=>document.querySelector(s);
+const norm=s=>(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ls={get(k,d){try{const v=localStorage.getItem("cacaobra:"+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem("cacaobra:"+k,JSON.stringify(v))}catch(e){}}};
+
+let MUN=[],OBRAS=[],AO_VIVO=[],META={};
+let st=Object.assign({cidade:"Porto Alegre",uf:"RS",lat:-30.032,lon:-51.230,raio:60,cat:new Set(),fase:new Set(),porte:new Set(),pri:null,q:"",ordem:"pri",ocultar:true},ls.get("estado",{}));
+st.cat=new Set(st.cat||[]);st.fase=new Set(st.fase||[]);st.porte=new Set(st.porte||[]);
+let marcas=ls.get("marcas",{}); // id -> {s:status,n:nota}
+let minhas=ls.get("minhas",[]);
+const salvar=()=>ls.set("estado",{...st,cat:[...st.cat],fase:[...st.fase],porte:[...st.porte]});
+
+function dist(a,b,c,d){const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function acharMun(txt){const t=norm(txt).replace(/\s*[-/]\s*([a-z]{2})$/,"|$1");const [n,uf]=t.split("|");return MUN.find(m=>norm(m[1])===n.trim()&&(!uf||m[2].toLowerCase()===uf))}
+
+function chips(el,itens,set,ch){el.innerHTML=itens.map(([k,v])=>`<button class="chip" data-k="${k}" aria-pressed="${set.has(k)}">${v}</button>`).join("");
+  el.onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const k=b.dataset.k;set.has(k)?set.delete(k):set.add(k);b.setAttribute("aria-pressed",set.has(k));salvar();ch()}}
+
+function telefones(txt){const out=[];(txt||"").replace(/(\(?\b(\d{2})\)?\s?)?(9?\d{4})[-\s]?(\d{4})\b|0800[-\s]?\d{3}[-\s]?\d{4}/g,(m,_,ddd,a,b)=>{
+  if(m.startsWith("0800")){out.push({ver:m,tel:m.replace(/\D/g,""),wpp:null});return m}
+  if(!ddd)return m; const num=ddd+a+b; out.push({ver:m.trim(),tel:"+55"+num,wpp:a.length===5&&a[0]==="9"?"55"+num:null});return m});return out}
+
+function todas(){return [...OBRAS,...AO_VIVO.filter(a=>!OBRAS.some(o=>o.id===a.id)),...minhas]}
+
+function filtrar(){
+  const q=norm(st.q);
+  return todas().map(o=>({...o,_d:(o.lat!=null)?dist(st.lat,st.lon,o.lat,o.lon):null}))
+   .filter(o=>o._d==null?norm(o.municipio).includes(norm(st.cidade)):o._d<=st.raio)
+   .filter(o=>!st.cat.size||st.cat.has(o.categoria))
+   .filter(o=>!st.fase.size||st.fase.has(o.fase))
+   .filter(o=>!st.porte.size||st.porte.has(o.porte))
+   .filter(o=>!q||norm([o.nome,o.municipio,o.endereco,o.construtora,o.responsavel,o.dica].join(" ")).includes(q))
+   .filter(o=>!st.ocultar||(marcas[o.id]||{}).s!=="Descartada");
+}
+function novaSemana(o){if(!o.primeira_vez)return false;return (Date.now()-new Date(o.primeira_vez).getTime())<8*864e5}
+
+function render(){
+  const base=filtrar();
+  const cont={alta:0,media:0,baixa:0};base.forEach(o=>cont[o.prioridade]=(cont[o.prioridade]||0)+1);
+  const novas=base.filter(novaSemana).length;
+  $("#resumo").innerHTML=[["alta","Alta"],["media","Média"],["baixa","Baixa"]].map(([k,v])=>`<button class="tile ${k} ${st.pri===k?"on":""}" data-p="${k}"><b>${cont[k]||0}</b><small>${v}</small></button>`).join("")+`<button class="tile ${st.pri==="novas"?"on":""}" data-p="novas"><b>${novas}</b><small>Novas</small></button>`;
+  let lista=base.filter(o=>!st.pri||(st.pri==="novas"?novaSemana(o):o.prioridade===st.pri));
+  const ord={pri:(a,b)=>(PRI_ORD[a.prioridade]-PRI_ORD[b.prioridade])||((a._d??999)-(b._d??999)),dist:(a,b)=>(a._d??999)-(b._d??999),rec:(a,b)=>String(b.primeira_vez||b.data_iso||"").localeCompare(String(a.primeira_vez||a.data_iso||""))};
+  lista.sort(ord[st.ordem]);
+  $("#contagem").textContent=`${lista.length} obra${lista.length===1?"":"s"} em ${st.cidade}/${st.uf} e até ${st.raio} km`;
+  $("#lista").innerHTML=lista.length?lista.map(ficha).join(""):`<div class="vazio"><b>Nenhuma obra aqui ainda</b>Aumente o raio, limpe os filtros ou toque em “Buscar licitações agora”. Para pesquisar obras particulares numa região nova, peça no chat do projeto.</div>`;
+}
+
+function ficha(o){
+  const m=marcas[o.id]||{};const passo=FASE_PASSO[o.fase]||1;
+  const fases=[1,2,3,4,5].map(i=>`<span class="${i<=passo?"on":""}"></span>`).join("");
+  const tels=telefones(o.contato);
+  const cont=o.contato&&o.contato!=="—"?`<div class="contato"><span class="num">${esc(o.contato)}</span>${tels.map(t=>`<a class="mini" href="tel:${t.tel}">Ligar</a>${t.wpp?`<a class="mini wpp" href="https://wa.me/${t.wpp}" target="_blank" rel="noopener">WhatsApp</a>`:""}`).join("")}<button class="mini" data-copia="${esc(o.contato)}">Copiar</button></div>`:"";
+  const linhas=[["Dono",o.responsavel],["Construtora",o.construtora],["Valor",o.valor],["Previsão",o.previsao],["Endereço",o.endereco],["Endereço da construtora",o.endereco_construtora]].filter(([,v])=>v&&v!=="—"&&v!=="Não informada");
+  const mapa=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([o.endereco,o.municipio,o.uf].filter(Boolean).join(", "))}`;
+  return `<article class="ficha ${o.prioridade} ${m.s==="Descartada"?"desc":""}">
+   <div class="faixa"></div><div class="corpo">
+    <div class="cab"><h3>${esc(o.nome)}</h3><span class="pri ${o.prioridade}">${({alta:"Alta",media:"Média",baixa:"Baixa"})[o.prioridade]||""}</span></div>
+    <div class="lugar">${esc(o.municipio)}/${esc(o.uf)}${o._d!=null?` · ${Math.round(o._d)} km`:""}</div>
+    <div class="tags"><span class="tag">${CAT[o.categoria]||o.categoria}</span>${o.porte?`<span class="tag">${PORTE[o.porte]||o.porte}</span>`:""}${novaSemana(o)?`<span class="tag nova">Nova</span>`:""}${o.minha?`<span class="tag">Anotada por mim</span>`:""}</div>
+    <div class="fases" aria-hidden="true">${fases}</div>
+    <div class="fasetxt"><b>${esc((FASES.find(f=>f[0]===o.fase)||[,""])[1])}</b><span>${esc(o.fase_texto||"")}</span></div>
+    ${linhas.length?`<dl>${linhas.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`:""}
+    ${cont}
+    ${o.dica?`<div class="dica">${esc(o.dica)}</div>`:""}
+    <textarea class="nota" data-nota="${esc(o.id)}" placeholder="Minha anotação…" rows="1">${esc(m.n||"")}</textarea>
+    <div class="rod"><select data-status="${esc(o.id)}" aria-label="Situação">${STATUS.map(s=>`<option ${s===(m.s||"Nova")?"selected":""}>${s}</option>`).join("")}</select>
+     <span class="row"><a class="mini" href="${mapa}" target="_blank" rel="noopener">Mapa</a>${o.fonte&&/^https?:/.test(o.fonte)?`<a class="mini" href="${esc(o.fonte)}" target="_blank" rel="noopener">Fonte</a>`:""}${o.minha?`<button class="mini" data-apaga="${esc(o.id)}">Apagar</button>`:""}</span></div>
+    <div style="font-size:12px;color:var(--muted)">${esc(o.origem||"")}${o.data_fonte?` · ${esc(o.data_fonte)}`:""}</div>
+   </div></article>`;
+}
+
+/* eventos da lista */
+$("#lista").addEventListener("change",e=>{const id=e.target.dataset.status;if(id){marcas[id]={...(marcas[id]||{}),s:e.target.value};ls.set("marcas",marcas);render()}});
+$("#lista").addEventListener("input",e=>{const id=e.target.dataset.nota;if(id){marcas[id]={...(marcas[id]||{}),n:e.target.value};ls.set("marcas",marcas)}});
+$("#lista").addEventListener("click",e=>{
+  const c=e.target.dataset.copia;if(c!=null){navigator.clipboard?.writeText(c).then(()=>{e.target.textContent="Copiado"}).catch(()=>{const s=e.target.parentNode.querySelector(".num");const r=document.createRange();r.selectNodeContents(s);getSelection().removeAllRanges();getSelection().addRange(r)})}
+  const a=e.target.dataset.apaga;if(a){if(e.target.textContent!=="Confirmar"){e.target.textContent="Confirmar";return}minhas=minhas.filter(o=>o.id!==a);ls.set("minhas",minhas);render()}
+});
+$("#resumo").onclick=e=>{const t=e.target.closest(".tile");if(!t)return;st.pri=st.pri===t.dataset.p?null:t.dataset.p;salvar();render()};
+$("#q").value=st.q;$("#q").oninput=e=>{st.q=e.target.value;salvar();render()};
+$("#ordem").value=st.ordem;$("#ordem").onchange=e=>{st.ordem=e.target.value;salvar();render()};
+$("#ocultar").checked=st.ocultar;$("#ocultar").onchange=e=>{st.ocultar=e.target.checked;salvar();render()};
+
+/* região */
+function txtRegiao(){$("#txtRegiao").textContent=`${st.cidade}/${st.uf} · ${st.raio} km`;$("#txtRaio").textContent=st.raio+" km";$("#raio").value=st.raio}
+$("#btnRegiao").onclick=()=>{const p=$("#painel");p.hidden=!p.hidden;$("#btnRegiao").setAttribute("aria-expanded",!p.hidden);if(!p.hidden){$("#cidade").value=`${st.cidade} - ${st.uf}`;$("#cidade").select()}};
+$("#raio").oninput=e=>{$("#txtRaio").textContent=e.target.value+" km"};
+$("#aplicar").onclick=()=>{const m=acharMun($("#cidade").value);if(!m){aviso("Não achei essa cidade. Escolha um nome da lista, ex.: Caxias do Sul - RS.");return}
+  Object.assign(st,{cidade:m[1],uf:m[2],lat:m[3],lon:m[4],raio:+$("#raio").value});AO_VIVO=[];salvar();txtRegiao();$("#painel").hidden=true;aviso("");render()};
+$("#gps").onclick=()=>{if(!navigator.geolocation){aviso("Este aparelho não informou a localização. Digite a cidade.");return}
+  navigator.geolocation.getCurrentPosition(p=>{const{latitude:a,longitude:b}=p.coords;let best=null,bd=1e9;MUN.forEach(m=>{const d=dist(a,b,m[3],m[4]);if(d<bd){bd=d;best=m}});
+   Object.assign(st,{cidade:best[1],uf:best[2],lat:a,lon:b,raio:+$("#raio").value});salvar();txtRegiao();$("#painel").hidden=true;render()},
+   ()=>aviso("Não consegui pegar a localização aqui. Digite a cidade."),{timeout:10000})};
+
+function aviso(t){$("#msg").innerHTML=t?`<div class="aviso">${t}</div>`:""}
+
+/* busca ao vivo no PNCP (funciona quando o app está no endereço próprio) */
+const PALAVRAS=["obra","construcao","pavimenta","recape","asfalt","calcament","drenagem","ponte","viaduto","contencao","reforma","ampliacao","concreto","usinado","escola","creche","ubs","quadra","ginasio","saneamento","esgot","engenharia","infraestrutura","urbaniza","habitaciona","muro","galeria","bueiro"];
+const FORA=["pneu","medicament","alimenti","merenda","combustivel","software","uniforme","veiculo","limpeza","vigilancia"];
+$("#buscarAgora").onclick=async()=>{
+  const b=$("#buscarAgora");b.disabled=true;b.textContent="Buscando…";aviso("");
+  const perto=new Map(MUN.filter(m=>dist(st.lat,st.lon,m[3],m[4])<=st.raio).map(m=>[m[0],m]));
+  const ufs=[...new Set([...perto.values()].map(m=>m[2]))];
+  const fim=new Date(Date.now()+120*864e5).toISOString().slice(0,10).replace(/-/g,"");
+  const achados=[];let erro=false;
+  try{
+    for(const uf of ufs)for(const mod of [4,5,6]){
+      for(let pg=1;pg<=20;pg++){
+        const r=await fetch(`https://pncp.gov.br/api/consulta/v1/contratacoes/proposta?dataFinal=${fim}&codigoModalidadeContratacao=${mod}&uf=${uf}&pagina=${pg}&tamanhoPagina=50`);
+        if(r.status===204)break; if(!r.ok)throw new Error(r.status);
+        const j=await r.json(); (j.data||[]).forEach(it=>{const m=perto.get(+it.unidadeOrgao?.codigoIbge);const o=norm(it.objetoCompra);
+          if(m&&PALAVRAS.some(p=>o.includes(p))&&!FORA.some(p=>o.includes(p)))achados.push(converter(it,m))});
+        if(!j.paginasRestantes)break;
+      }
+    }
+  }catch(e){erro=true}
+  b.disabled=false;b.textContent="🔎 Buscar licitações agora";
+  if(erro&&!achados.length){aviso("A busca ao vivo não funciona nesta versão do app. A lista é atualizada toda semana; para uma região nova agora, peça no chat do projeto.");return}
+  AO_VIVO=achados;aviso(`${achados.length} licitação(ões) de obra com proposta aberta encontradas agora no PNCP.`);render();
+};
+function converter(it,m){const v=+(it.valorTotalEstimado||0);const enc=(it.dataEncerramentoProposta||"").slice(0,10);const o=norm(it.objetoCompra);
+  const porte=v>=5e6?"grande":v>=5e5?"medio":"pequeno";const conc=/concreto|usinado|pre-?moldado/.test(o);
+  const mm=(it.numeroControlePNCP||"").match(/(\d{14})-\d-(\d+)\/(\d{4})/);
+  return{id:"pncp-"+it.numeroControlePNCP,nome:(it.objetoCompra||"").slice(0,220),municipio:m[1],uf:m[2],lat:m[3],lon:m[4],categoria:/pavimenta|recape|asfalt|drenagem|ponte|viaduto|saneamento|esgot|galeria|bueiro|calcament|infraestrutura/.test(o)?"infraestrutura":"obra_publica",
+   fase:"licitacao",fase_texto:enc?`Propostas até ${enc.split("-").reverse().join("/")}`:"Licitação aberta",prioridade:conc||porte==="grande"?"alta":porte==="medio"?"media":"baixa",porte,
+   responsavel:it.orgaoEntidade?.razaoSocial||"",construtora:"A definir (licitação)",contato:"",valor:v?v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})+" (estimado)":"",
+   dica:conc?"Compra direta de concreto: o órgão é o comprador.":"Procure as construtoras que estão disputando e ofereça orçamento para a proposta delas.",
+   fonte:mm?`https://pncp.gov.br/app/editais/${mm[1]}/${mm[3]}/${+mm[2]}`:"https://pncp.gov.br",data_fonte:(it.dataPublicacaoPncp||"").slice(0,10),origem:"PNCP (busca agora)",primeira_vez:new Date().toISOString().slice(0,10)}}
+
+/* obra anotada pelo usuário */
+$("#mCat").innerHTML=Object.entries(CAT).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+$("#mFase").innerHTML=FASES.map(([k,v])=>`<option value="${k}" ${k==="em_obra"?"selected":""}>${v}</option>`).join("");
+$("#novaObra").onclick=()=>{$("#modal").hidden=false;$("#mCidade").value=`${st.cidade} - ${st.uf}`;$("#mNome").focus()};
+$("#mCancelar").onclick=()=>{$("#modal").hidden=true};
+$("#modal").onclick=e=>{if(e.target.id==="modal")$("#modal").hidden=true};
+$("#form").onsubmit=e=>{e.preventDefault();const m=acharMun($("#mCidade").value);
+  const o={id:"minha-"+Date.now(),minha:true,nome:$("#mNome").value.trim(),municipio:m?m[1]:$("#mCidade").value,uf:m?m[2]:st.uf,lat:m?m[3]:null,lon:m?m[4]:null,
+   endereco:$("#mEnd").value,categoria:$("#mCat").value,fase:$("#mFase").value,fase_texto:"",prioridade:$("#mPri").value,porte:"",construtora:$("#mConst").value,contato:$("#mTel").value,
+   dica:$("#mObs").value,origem:"Anotada por mim",data_fonte:new Date().toLocaleDateString("pt-BR"),primeira_vez:new Date().toISOString().slice(0,10)};
+  minhas.unshift(o);ls.set("minhas",minhas);$("#form").reset();$("#modal").hidden=true;render()};
+
+/* carregar dados */
+async function iniciar(){
+  try{
+    const [m,d]=await Promise.all([fetch("dados/municipios.json").then(r=>r.json()),fetch("dados/obras.json").then(r=>r.json())]);
+    MUN=m;OBRAS=d.obras||[];META=d;
+  }catch(e){aviso("Não consegui carregar a lista de obras. Verifique a internet e abra de novo.");}
+  $("#listaCidades").innerHTML=MUN.map(m=>`<option value="${esc(m[1])} - ${m[2]}">`).join("");
+  if(META.atualizado_em){const[a,mm,dd]=META.atualizado_em.slice(0,10).split("-");$("#atualizado").textContent=`Atualizado em ${dd}/${mm}/${a}`}
+  chips($("#fCat"),Object.entries(CAT),st.cat,render);
+  chips($("#fFase"),FASES,st.fase,render);
+  chips($("#fPorte"),Object.entries(PORTE),st.porte,render);
+  txtRegiao();render();
+}
+iniciar();
+if("serviceWorker" in navigator&&location.protocol==="https:"&&!/claude/.test(location.hostname)){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+})();
+</script>
+
+</body>
+</html>
