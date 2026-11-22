@@ -638,7 +638,8 @@
   "cnpj_construtora": "47737615000169",
   "endereco_construtora": "RUA DOARLY PADUA DOS SANTOS, 3930, INDUSTRIAL, VENANCIO AIRES/RS",
   "precisao": "bairro",
-  "bairro": "Lindos Ares"
+  "bairro": "Lindos Ares",
+  "geo_ok": true
  },
  {
   "id": "pncp-88117700000101-1-000329/2026",
@@ -677,8 +678,8 @@
   "municipio": "São Jerônimo",
   "uf": "RS",
   "ibge": 4318408,
-  "lat": -29.9716,
-  "lon": -51.7251,
+  "lat": -29.9776,
+  "lon": -51.73307,
   "endereco": "Rua João Ramiz Ruiz",
   "categoria": "infraestrutura",
   "fase": "contratada",
@@ -700,7 +701,10 @@
   "primeira_vez": "2026-11-22",
   "cnpj_construtora": "50529454000122",
   "endereco_construtora": "RUA CIRNE LIMA, 128, MORADA DO VALE I, GRAVATAI/RS",
-  "precisao": "cidade"
+  "precisao": "via",
+  "bairro": "Passo D'Areia",
+  "geo_ok": true,
+  "referencia": ""
  },
  {
   "id": "pncp-94309291000148-1-000231/2026",
@@ -911,8 +915,8 @@
   "municipio": "Porto Alegre",
   "uf": "RS",
   "ibge": 4314902,
-  "lat": -30.0318,
-  "lon": -51.2065,
+  "lat": -30.05553,
+  "lon": -51.1646,
   "endereco": "Avenida Ipiranga",
   "categoria": "infraestrutura",
   "fase": "licitacao",
@@ -932,7 +936,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "cidade"
+  "precisao": "via",
+  "bairro": "Jardim do Salso",
+  "geo_ok": true,
+  "referencia": "perto de Escola Professora Lygia Morrone Averbuck (~210 m)"
  },
  {
   "id": "pncp-90832619000155-1-000617/2026",
@@ -990,8 +997,9 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "rua",
+  "precisao": "via",
   "bairro": "Sarandi",
+  "geo_ok": true,
   "referencia": "perto de Escola João Goulart (~130 m)"
  },
  {
@@ -1021,8 +1029,9 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "rua",
+  "precisao": "via",
   "bairro": "Piratini",
+  "geo_ok": true,
   "referencia": "perto de Posto BR (~150 m)"
  },
  {
@@ -1052,9 +1061,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "rua",
+  "precisao": "via",
   "bairro": "Cidade Baixa",
-  "referencia": "perto de Universidade São Leopoldo Mandic (~30 m)"
+  "geo_ok": true,
+  "referencia": ""
  },
  {
   "id": "pncp-92963560000160-1-001452/2026",
@@ -1083,9 +1093,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "rua",
+  "precisao": "via",
   "bairro": "Hípica",
-  "referencia": "perto de Mercado Caxias (~200 m)"
+  "geo_ok": true,
+  "referencia": ""
  },
  {
   "id": "pncp-92963560000160-1-001454/2026",
@@ -1648,8 +1659,8 @@
   "municipio": "Canoas",
   "uf": "RS",
   "ibge": 4304606,
-  "lat": -29.94379,
-  "lon": -51.19662,
+  "lat": -29.94462,
+  "lon": -51.19641,
   "endereco": "Rua José de Alencar, 385 – Bairro Rio",
   "categoria": "obra_publica",
   "fase": "licitacao",
@@ -1669,9 +1680,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "rua",
+  "precisao": "via",
   "bairro": "Fátima",
-  "referencia": "perto de Igreja Santa Maria Madalena (~50 m)"
+  "geo_ok": true,
+  "referencia": "perto de Igreja Santa Maria Madalena (~140 m)"
  },
  {
   "id": "pncp-88117700000101-1-000303/2026",
@@ -1932,8 +1944,9 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "rua",
+  "precisao": "via",
   "bairro": "Lago Parque Clube",
+  "geo_ok": true,
   "referencia": ""
  },
  {
@@ -2294,8 +2307,8 @@
   "municipio": "Ivoti",
   "uf": "RS",
   "ibge": 4310801,
-  "lat": -29.60383,
-  "lon": -51.15626,
+  "lat": -29.61971,
+  "lon": -51.16536,
   "endereco": "Avenida Presidente Lucena, 2268 – Bairro Concórdia",
   "categoria": "obra_publica",
   "fase": "licitacao",
@@ -2315,8 +2328,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "bairro",
-  "bairro": "Concórdia"
+  "precisao": "via",
+  "bairro": "Bom Jardim",
+  "geo_ok": true,
+  "referencia": "perto de Praça Bom Jardim (~390 m)"
  },
  {
   "id": "pncp-93802833000157-1-000105/2026",
@@ -2703,8 +2718,8 @@
   "municipio": "Campo Bom",
   "uf": "RS",
   "ibge": 4303905,
-  "lat": -29.6747,
-  "lon": -51.0606,
+  "lat": -29.67597,
+  "lon": -51.08823,
   "endereco": "Avenida Brasil",
   "categoria": "infraestrutura",
   "fase": "licitacao",
@@ -2724,7 +2739,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "cidade"
+  "precisao": "via",
+  "bairro": "Canudos",
+  "geo_ok": true,
+  "referencia": ""
  },
  {
   "id": "pncp-90832619000155-1-000591/2026",
@@ -2877,8 +2895,8 @@
   "municipio": "Porto Alegre",
   "uf": "RS",
   "ibge": 4314902,
-  "lat": -30.0318,
-  "lon": -51.2065,
+  "lat": -30.04374,
+  "lon": -51.20734,
   "endereco": "Rua RAMIRO BARCELOS",
   "categoria": "infraestrutura",
   "fase": "licitacao",
@@ -2898,7 +2916,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "cidade"
+  "precisao": "via",
+  "bairro": "Santana",
+  "geo_ok": true,
+  "referencia": "perto de Praça João Belém (~70 m)"
  },
  {
   "id": "pncp-00394429000100-1-002604/2026",
@@ -3138,8 +3159,8 @@
   "municipio": "Alvorada",
   "uf": "RS",
   "ibge": 4300604,
-  "lat": -29.9914,
-  "lon": -51.0809,
+  "lat": -30.01019,
+  "lon": -51.09044,
   "endereco": "Avenida Presidente Getúlio Vargas",
   "categoria": "obra_publica",
   "fase": "licitacao",
@@ -3159,7 +3180,10 @@
   "origem": "PNCP (automático)",
   "modalidade": "Concorrência - Eletrônica",
   "primeira_vez": "2026-11-22",
-  "precisao": "cidade"
+  "precisao": "via",
+  "bairro": "Centro",
+  "geo_ok": true,
+  "referencia": "perto de Posto Ipiranga (~60 m)"
  },
  {
   "id": "pncp-94309291000148-1-000189/2026",

@@ -1,5 +1,5 @@
 {
- "data": "2026-11-22 16:17",
+ "data": "2026-11-22 16:50",
  "status": "ok",
  "alertas": [],
  "licitacoes_lidas": 6783,
@@ -8,9 +8,10 @@
  "com_vencedor": 8,
  "pesquisa_manual": 59,
  "localizacao": {
-  "rua": 10,
-  "bairro": 20,
-  "cidade": 145
+  "rua": 4,
+  "via": 23,
+  "bairro": 15,
+  "cidade": 133
  },
  "consultas": 198,
  "falhas": 0
