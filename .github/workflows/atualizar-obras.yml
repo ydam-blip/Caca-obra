@@ -59,9 +59,9 @@ jobs:
           git diff --cached --quiet || git commit -m "Atualização automática de obras $(date +%F)"
           git pull --rebase -X theirs origin main || git pull --rebase origin main
           git push
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: .
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
