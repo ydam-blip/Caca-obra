@@ -27,11 +27,18 @@ jobs:
               t = cno._colunas(cli)
               for nome, cols in t.items():
                   print("TABELA", nome, cols)
-          mun = coletar.carregar_municipios()
-          _, alvo = coletar.municipios_no_raio(mun, "Porto Alegre", "RS", 60)
-          linhas, rel = cno.buscar(alvo)
-          print("RELATORIO", json.dumps(rel, ensure_ascii=False))
-          for r in linhas[:8]:
-              r2 = dict(r); r2["responsavel"] = (r2.get("responsavel") or "")[:4] + "…"
-              print("AMOSTRA", json.dumps(r2, ensure_ascii=False))
+          T = "basedosdados.br_rf_cno.microdados"
+          def q(sql):
+              try:
+                  return [dict(r.items()) for r in cli.query(sql).result()]
+              except Exception as e:
+                  return [{"erro": str(e)[:300]}]
+          print("Q1", q(f"SELECT data_extracao, COUNT(*) n FROM `{T}` GROUP BY 1 ORDER BY 1 DESC LIMIT 5"))
+          print("Q2", q(f"SELECT COUNT(*) n FROM `{T}` WHERE sigla_uf='RS'"))
+          print("Q3", q(f"SELECT COUNT(*) n FROM `{T}` WHERE sigla_uf='RS' AND id_municipio='4314902'"))
+          print("Q4", q(f"SELECT MAX(data_inicio) mi, MAX(data_registro) mr, MIN(data_inicio) mn FROM `{T}` WHERE sigla_uf='RS'"))
+          print("Q5", q(f"SELECT situacao, COUNT(*) n FROM `{T}` WHERE sigla_uf='RS' GROUP BY 1 ORDER BY 2 DESC LIMIT 8"))
+          print("Q6", q(f"SELECT area, unidade_medida, data_inicio, data_registro, situacao, id_municipio, bairro, logradouro, numero_logradouro FROM `{T}` WHERE sigla_uf='RS' AND id_municipio='4314902' ORDER BY data_registro DESC LIMIT 5"))
+          print("Q7", q("SELECT table_name, column_name, data_type FROM `basedosdados.br_rf_cno.INFORMATION_SCHEMA.COLUMNS` WHERE table_name='microdados'"))
+          print("Q8", q("SELECT * FROM `basedosdados.br_rf_cno.dicionario` WHERE nome_coluna IN ('situacao','qualificacao_responsavel','unidade_medida') LIMIT 40"))
           PY
