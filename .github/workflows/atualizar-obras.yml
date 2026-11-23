@@ -15,6 +15,10 @@ on:
         description: "Raio em km"
         required: false
         default: "60"
+      so_publicar:
+        description: "Só republicar o site, sem buscar de novo (sim/não)"
+        required: false
+        default: "não"
 
 permissions:
   contents: write
@@ -33,8 +37,10 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar leitor do CNO
+        if: github.event.inputs.so_publicar != 'sim'
         run: pip install --quiet google-cloud-bigquery
       - name: Buscar obras (PNCP + CNPJ + CNO)
+        if: github.event.inputs.so_publicar != 'sim'
         env:
           GCP_CHAVE: ${{ secrets.GCP_CHAVE }}
         run: |
@@ -45,6 +51,7 @@ jobs:
           fi
           python3 coletor/montar_site.py
       - name: Salvar resultado
+        if: github.event.inputs.so_publicar != 'sim'
         run: |
           git config user.name "caca-obra-bot"
           git config user.email "caca-obra-bot@users.noreply.github.com"
