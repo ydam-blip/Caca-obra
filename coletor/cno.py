@@ -73,49 +73,54 @@ def _escolher(cols):
     return out
 
 
+SITUACAO = {"1": "Nula", "2": "Ativa", "3": "Suspensa", "14": "Paralisada", "15": "Encerrada"}
+QUALIFICACAO = {"53": "Construtora", "64": "Incorporadora", "57": "Dono da obra", "70": "Proprietário do imóvel",
+                "109": "Consórcio", "110": "Construção em nome coletivo", "111": "Líder de consórcio"}
+INICIO_DESDE_DIAS = 540   # obras iniciadas até ~18 meses antes da foto do CNO
+AREA_MIN_ATIVA = 500      # m²
+
+
 def buscar(municipios_alvo, hoje=None, log=print):
-    """municipios_alvo: {ibge: {nome, uf, lat, lon}}. Devolve (lista de registros, relatório)."""
+    """municipios_alvo: {ibge: {nome, uf, lat, lon}}. Devolve (lista de registros, relatório).
+
+    A Base dos Dados guarda "fotos" diárias do CNO (coluna data_extracao). Usamos só a foto
+    mais recente e só obras ATIVAS, grandes e iniciadas nos ~18 meses anteriores à foto:
+    são as que mais provavelmente ainda estão em obra (estrutura, pisos, calçadas).
+    """
     hoje = hoje or date.today()
     cli, erro = _cliente()
     if not cli:
         log(f"CNO: {erro}")
         return [], {"status": "desligado", "motivo": erro}
-    tabelas = _colunas(cli)
-    log(f"CNO: tabelas encontradas: { {t: len(c) for t, c in tabelas.items()} }")
-    principal = next((t for t in ("microdados", "obras", "cno") if t in tabelas), None) \
-        or max(tabelas, key=lambda t: len(tabelas[t]))
-    m = _escolher(tabelas[principal])
-    log(f"CNO: tabela {principal}; colunas usadas: {m}")
-    faltam = [k for k in ("id", "uf", "municipio", "logradouro") if k not in m]
-    if faltam:
-        return [], {"status": "alerta", "motivo": f"colunas não encontradas: {faltam}", "colunas": tabelas[principal]}
-
-    ufs = sorted({v["uf"] for v in municipios_alvo.values()})
-    codigos = sorted({str(k) for k in municipios_alvo})
-    data_col = m.get("inicio") or m.get("registro")
-    desde = (hoje - timedelta(days=DIAS)).isoformat()
-    sel = ", ".join(f"CAST({col} AS STRING) AS {k}" for k, col in m.items())
-    onde = [f"CAST({m['uf']} AS STRING) IN UNNEST(@ufs)",
-            f"CAST({m['municipio']} AS STRING) IN UNNEST(@codigos)"]
-    if data_col:
-        onde.append(f"SAFE_CAST({data_col} AS DATE) >= DATE(@desde)")
-    if "area" in m:
-        onde.append(f"SAFE_CAST({m['area']} AS FLOAT64) >= {AREA_MIN}")
-    ordem = f"SAFE_CAST({m['area']} AS FLOAT64) DESC" if "area" in m else (f"{data_col} DESC" if data_col else "1")
-    q = f"SELECT {sel} FROM `{DATASET}.{principal}` WHERE {' AND '.join(onde)} ORDER BY {ordem} LIMIT {MAX_OBRAS * 3}"
     from google.cloud import bigquery
+    T = f"{DATASET}.microdados"
+    foto = list(cli.query(f"SELECT MAX(data_extracao) d FROM `{T}` WHERE data_extracao >= '2024-01-01'").result())[0].d
+    desde = (foto - timedelta(days=INICIO_DESDE_DIAS)).isoformat()
+    q = f"""
+      SELECT id_cno AS id, nome_empresarial AS nome, sigla_uf AS uf, id_municipio AS municipio, cep,
+             tipo_logradouro, logradouro, numero_logradouro AS numero, bairro, complemento,
+             area, unidade_medida, CAST(data_inicio AS STRING) AS inicio, CAST(data_registro AS STRING) AS registro,
+             situacao, id_responsavel AS responsavel, qualificacao_responsavel AS qualificacao
+      FROM `{T}`
+      WHERE data_extracao = DATE(@foto)
+        AND sigla_uf IN UNNEST(@ufs) AND id_municipio IN UNNEST(@codigos)
+        AND situacao = '2' AND data_inicio >= DATE(@desde)
+        AND area >= {AREA_MIN_ATIVA} AND LOWER(IFNULL(unidade_medida, 'm2')) LIKE 'm%'
+      ORDER BY area DESC
+      LIMIT {MAX_OBRAS}"""
     cfg = bigquery.QueryJobConfig(query_parameters=[
-        bigquery.ArrayQueryParameter("ufs", "STRING", ufs),
-        bigquery.ArrayQueryParameter("codigos", "STRING", codigos),
+        bigquery.ScalarQueryParameter("foto", "STRING", foto.isoformat()),
+        bigquery.ArrayQueryParameter("ufs", "STRING", sorted({v["uf"] for v in municipios_alvo.values()})),
+        bigquery.ArrayQueryParameter("codigos", "STRING", sorted({str(k) for k in municipios_alvo})),
         bigquery.ScalarQueryParameter("desde", "STRING", desde)])
     job = cli.query(q, job_config=cfg)
     linhas = [dict(r.items()) for r in job.result()]
+    for r in linhas:
+        r["foto"] = foto.isoformat()
     gb = (job.total_bytes_processed or 0) / 1e9
-    # tira as encerradas/anuladas quando há coluna de situação em texto
-    if "situacao" in m:
-        linhas = [r for r in linhas if not re.search(r"encerr|anulad|baixad|cancel", _norm(r.get("situacao")))]
-    log(f"CNO: {len(linhas)} obras na região desde {desde} ({gb:.2f} GB lidos)")
-    return linhas[:MAX_OBRAS], {"status": "ok", "tabela": principal, "obras": len(linhas), "gb": round(gb, 2)}
+    atraso = (hoje - foto).days
+    log(f"CNO: foto de {foto} ({atraso} dias atrás); {len(linhas)} obras ativas ≥{AREA_MIN_ATIVA} m² iniciadas desde {desde} ({gb:.2f} GB lidos)")
+    return linhas, {"status": "ok", "foto": foto.isoformat(), "dias_de_atraso": atraso, "obras": len(linhas), "gb": round(gb, 2)}
 
 
 def _data_br(s):
@@ -145,8 +150,8 @@ def converter(r, municipios_alvo, hoje, dados_cnpj=None):
         cat = "residencial"
     porte = "grande" if area >= 5000 else "medio" if area >= 1000 else "pequeno"
     ini = str(r.get("inicio") or r.get("registro") or "")[:10]
-    recente = ini and ini >= (hoje - timedelta(days=90)).isoformat()
-    prioridade = "alta" if area >= 3000 and recente else "media" if area >= 1000 else "baixa"
+    recente = bool(ini) and ini >= (hoje - timedelta(days=365)).isoformat()
+    prioridade = "alta" if area >= 3000 and recente else "media" if area >= 1500 or (area >= 800 and recente) else "baixa"
     rua = " ".join(x for x in [str(r.get("tipo_logradouro") or "").title(), str(r.get("logradouro") or "").title()] if x).strip()
     num = str(r.get("numero") or "").strip()
     bairro = str(r.get("bairro") or "").title()
@@ -157,13 +162,13 @@ def converter(r, municipios_alvo, hoje, dados_cnpj=None):
         nome=(nome or "Obra particular") + f" – {int(area):,} m²".replace(",", "."),
         municipio=mun["nome"], uf=mun["uf"], endereco=endereco, cep=str(r.get("cep") or ""),
         categoria=cat, fase="em_obra",
-        fase_texto=f"Registrada no CNO (Receita) – início {_data_br(ini)}" if ini else "Registrada no CNO (Receita)",
+        fase_texto=(f"Ativa no CNO em {_data_br(r.get('foto'))} – início {_data_br(ini)}" if ini else "Ativa no CNO (Receita)"),
         prioridade=prioridade, porte=porte, valor=f"{int(area):,} m² de área".replace(",", "."),
-        responsavel=nome if pj else "Pessoa física (dono da obra)",
-        construtora=nome if pj and re.search(r"constru|engenh|incorpor|empreend", nome_txt) else "",
+        responsavel=(nome if pj else "Pessoa física") + (f" ({QUALIFICACAO.get(str(r.get('qualificacao')), '')})" if QUALIFICACAO.get(str(r.get('qualificacao'))) else ""),
+        construtora=nome if pj and (str(r.get("qualificacao")) in ("53", "64") or re.search(r"constru|engenh|incorpor|empreend", nome_txt)) else "",
         contato="", previsao="",
-        dica=("Obra recém-registrada: está começando. Vá ao endereço e procure o mestre de obras ou o engenheiro."
-              if recente else "Obra em andamento: confira no local em que fase está (estrutura ainda pode estar por vir)."),
+        dica=("Obra grande iniciada há menos de 1 ano: estrutura e pisos devem estar em andamento. Vá ao endereço e procure o engenheiro ou o mestre de obras."
+              if recente else "Obra ativa há mais de 1 ano: confira no local a fase (ainda pode ter lajes, pisos, calçadas e muros)."),
         fonte="https://basedosdados.org/dataset/062621e9-5aa0-4903-852d-619ae54393d2",
         data_fonte=_data_br(ini), data_iso=ini, origem="CNO – Receita Federal (automático)",
         cno=str(r.get("id") or ""), area_m2=area,
