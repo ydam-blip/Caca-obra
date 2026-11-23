@@ -408,9 +408,21 @@ def coletar(regioes, hoje=None, buscar=buscar_pncp, vencedor=buscar_vencedor, cn
             if cno_rel.get("status") == "ok":
                 ant = {o["id"]: o for o in cno_obras}
                 novas = {}
+                pedidos = [0]
+
+                def cnpj_limitado(ni):  # contato da empresa: no máximo 150 consultas novas por semana
+                    if ni in _cache_cnpj or pedidos[0] < 150:
+                        pedidos[0] += ni not in _cache_cnpj
+                        return dados_cnpj(ni)
+                    return None
                 for r in linhas:
                     oid = f"cno-{r.get('id')}"
-                    o = ant.get(oid) or cno.converter(r, alvo, hoje, dados_cnpj)
+                    o = ant.get(oid)
+                    if o and not o.get("contato") and o.get("prioridade") in ("alta", "media"):
+                        o = None  # tenta de novo achar o contato
+                    o = o or cno.converter(r, alvo, hoje, cnpj_limitado)
+                    if o and ant.get(oid, {}).get("primeira_vez"):
+                        o["primeira_vez"] = ant[oid]["primeira_vez"]
                     if o:
                         o.setdefault("primeira_vez", hoje.isoformat())
                         novas[oid] = o

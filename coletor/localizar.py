@@ -19,6 +19,8 @@ NOMINATIM = "https://nominatim.openstreetmap.org/search"
 OVERPASS = "https://overpass-api.de/api/interpreter"
 UA = "caca-obra-coletor/1.0"
 MAX_KM_DO_CENTRO = 30
+TEMPO_MAX = 35 * 60   # segundos: o resto fica para a próxima semana (o cache guarda o que já foi feito)
+MAX_REFS = 80         # pontos de referência (Overpass) novos por execução
 
 RE_LOGRADOURO = re.compile(
     r"\b(rua|r\.|avenida|av\.?|estrada|travessa|alameda|rodovia|beco|largo|pra[cç]a)\s+"
@@ -38,11 +40,11 @@ def _dist(a, b, c, d):
     return 2 * 6371 * math.asin(math.sqrt(x))
 
 
-def _get(url, dados=None):
-    for i in range(3):
+def _get(url, dados=None, tentativas=3, timeout=60):
+    for i in range(tentativas):
         try:
             req = urllib.request.Request(url, data=dados, headers={"User-Agent": UA, "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
                 return json.loads(r.read())
         except Exception as e:
             print(f"   aviso localizar: {e}")
@@ -123,7 +125,7 @@ def _referencia(lat, lon, cache):
  way(around:400,{lat},{lon})[name][amenity~"school|hospital|university|fuel"];
  way(around:400,{lat},{lon})[name][shop~"supermarket|mall"];);
 out center 30;"""
-    res = _get(OVERPASS, urllib.parse.urlencode({"data": q}).encode())
+    res = _get(OVERPASS, urllib.parse.urlencode({"data": q}).encode(), tentativas=1, timeout=35)
     time.sleep(1.0)
     ref = ""
     if res and res.get("elements"):
@@ -168,11 +170,16 @@ def localizar(obras, municipios_por_nome, pasta_dados, limite=500, texto_extra=N
     geo, refs = cache.setdefault("geo", {}), cache.setdefault("ref", {})
     extras, orgaos = cache.setdefault("extra", {}), cache.setdefault("orgao", {})
     feitas = 0
+    refs_novas = 0
+    inicio = time.time()
     contagem = {"rua": 0, "via": 0, "bairro": 0, "orgao": 0, "cidade": 0}
+
+    def sem_tempo():
+        return time.time() - inicio > TEMPO_MAX
 
     def tentar(end, mun_nome, uf, centro):
         nonlocal feitas
-        if not (end and centro) or feitas >= limite:
+        if not (end and centro) or feitas >= limite or sem_tempo():
             return None
         for q in _consultas(end, mun_nome, uf):
             novo = q not in geo
@@ -182,7 +189,9 @@ def localizar(obras, municipios_por_nome, pasta_dados, limite=500, texto_extra=N
                 return r
         return None
 
-    for o in obras:
+    for i, o in enumerate(obras):
+        if i and i % 50 == 0:
+            print(f"   localizar: {i}/{len(obras)} obras, {feitas} consultas novas, {int(time.time() - inicio)} s", flush=True)
         if o.get("precisao") in ("rua", "via", "bairro") and o.get("lat") and o.get("geo_ok"):
             contagem[o["precisao"]] += 1
             continue
@@ -211,14 +220,17 @@ def localizar(obras, municipios_por_nome, pasta_dados, limite=500, texto_extra=N
                      bairro=resultado["bairro"], geo_ok=True)
             o.pop("local_orgao", None)
             if resultado["precisao"] in ("rua", "via"):
-                o["referencia"] = _referencia(resultado["lat"], resultado["lon"], refs)
+                chave_ref = f"{resultado['lat']:.4f},{resultado['lon']:.4f}"
+                if chave_ref in refs or (refs_novas < MAX_REFS and not sem_tempo()):
+                    refs_novas += chave_ref not in refs
+                    o["referencia"] = _referencia(resultado["lat"], resultado["lon"], refs)
             contagem[o["precisao"]] += 1
             continue
 
         # 3. endereço do órgão comprador
         if endereco_orgao and o.get("id", "").startswith("pncp-"):
             cnpj = o.get("orgao_cnpj") or (re.match(r"pncp-(\d{14})", o["id"]) or [None, None])[1]
-            if cnpj and cnpj not in orgaos:
+            if cnpj and cnpj not in orgaos and not sem_tempo():
                 info = endereco_orgao(cnpj) or {}
                 r = None
                 if info.get("consulta"):
