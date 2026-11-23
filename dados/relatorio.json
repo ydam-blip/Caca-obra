@@ -1,18 +1,18 @@
 {
- "data": "2026-11-23 04:29",
+ "data": "2026-11-23 22:11",
  "status": "ok",
  "alertas": [],
- "licitacoes_lidas": 6611,
- "obras_pncp": 118,
- "novas_semana": 3,
+ "licitacoes_lidas": 6588,
+ "obras_pncp": 117,
+ "novas_semana": 4,
  "com_vencedor": 8,
  "pesquisa_manual": 59,
  "localizacao": {
-  "rua": 12,
-  "via": 91,
-  "bairro": 24,
+  "rua": 16,
+  "via": 139,
+  "bairro": 33,
   "orgao": 84,
-  "cidade": 366
+  "cidade": 304
  },
  "cno": {
   "status": "ok",
@@ -22,6 +22,6 @@
   "gb": 0.0,
   "ja_na_lista": 0
  },
- "consultas": 346,
- "falhas": 3
+ "consultas": 336,
+ "falhas": 2
 }
